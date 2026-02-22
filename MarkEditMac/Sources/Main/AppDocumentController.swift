@@ -17,30 +17,13 @@ final class AppDocumentController: NSDocumentController {
   static var suggestedTextEncoding: EditorTextEncoding?
   static var suggestedFilename: String?
 
-  override func beginOpenPanel(_ openPanel: NSOpenPanel, forTypes inTypes: [String]?) async -> Int {
-    if let defaultDirectory = AppRuntimeConfig.defaultOpenDirectory {
-      setOpenPanelDirectory(defaultDirectory)
-    }
-
-    openPanel.accessoryView = EditorSaveOptionsView.wrapper(for: .openPanel) { [weak openPanel] result in
-      switch result {
-      case .textEncoding(let value):
-        Self.suggestedTextEncoding = value
-      case .showHiddenFiles(let value):
-        openPanel?.showsHiddenFiles = value
-      default:
-        Logger.assertFail("Invalid change: \(result)")
-      }
-    }
-
-    Self.suggestedTextEncoding = nil
-    openPanel.showsHiddenFiles = AppPreferences.General.showHiddenFiles
-
-    return await super.beginOpenPanel(openPanel, forTypes: inTypes)
+  // MarkEdit Modal: prevent creating new documents
+  override func newDocument(_ sender: Any?) {
+    // No-op: single-file editor
   }
 
-  override func saveAllDocuments(_ sender: Any?) {
-    // The default implementation doesn't work
-    documents.forEach { $0.save(sender) }
+  // MarkEdit Modal: prevent opening additional documents via menu
+  override func openDocument(_ sender: Any?) {
+    // No-op: single-file editor
   }
 }

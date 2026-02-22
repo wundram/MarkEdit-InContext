@@ -1,0 +1,12 @@
+#!/bin/bash
+# mem - MarkEdit Modal CLI launcher
+
+if [ -z "$1" ]; then
+  echo "Usage: mem <file>" >&2
+  exit 1
+fi
+
+# Resolve to absolute path
+FILE_PATH="$(cd "$(dirname "$1")" 2>/dev/null && pwd)/$(basename "$1")"
+
+open -a "MarkEdit Modal" "$FILE_PATH"

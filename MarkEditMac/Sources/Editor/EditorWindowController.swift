@@ -13,7 +13,7 @@ final class EditorWindowController: NSWindowController, NSWindowDelegate {
 
   required init?(coder: NSCoder) {
     super.init(coder: coder)
-    shouldCascadeWindows = true
+    shouldCascadeWindows = false
   }
 
   override func windowDidLoad() {
@@ -82,6 +82,8 @@ final class EditorWindowController: NSWindowController, NSWindowDelegate {
 
   func windowWillClose(_ notification: Notification) {
     editorViewController?.clearEditor()
+    // MarkEdit Modal: closing the window = quit app
+    NSApp.terminate(nil)
   }
 }
 

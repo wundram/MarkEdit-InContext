@@ -90,9 +90,7 @@
 		</dict>
 	</array>
 	<key>NSAppleScriptEnabled</key>
-	<true/>
-	<key>OSAScriptingDefinition</key>
-	<string>MarkEdit.sdef</string>
+	<false/>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -101,10 +99,10 @@
 			<key>CFBundleURLIconFile</key>
 			<string></string>
 			<key>CFBundleURLName</key>
-			<string>markedit</string>
+			<string>mem</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>markedit</string>
+				<string>mem</string>
 			</array>
 		</dict>
 	</array>

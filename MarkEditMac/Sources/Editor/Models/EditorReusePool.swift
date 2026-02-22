@@ -56,7 +56,7 @@ final class EditorReusePool {
   private init() {}
 
   private enum Constants {
-    static let numberOfWarmUp: Int = 2
-    static let numberOfKeepAlive: Int = 3
+    static let numberOfWarmUp: Int = 1
+    static let numberOfKeepAlive: Int = 1
   }
 }

@@ -10,11 +10,23 @@ import MarkEditKit
 
 @main
 final class Application: NSApplication {
+  /// File path passed via command line arguments
+  static var launchFilePath: String?
+
   var currentEditor: EditorViewController? {
     keyWindow?.contentViewController as? EditorViewController
   }
 
   static func main() {
+    // Parse command line arguments for file path before anything else.
+    // Filter out args that start with "-" (Xcode/system args) and the executable path.
+    let args = CommandLine.arguments.dropFirst().filter { !$0.hasPrefix("-") }
+    if let filePath = args.first {
+      // Resolve to absolute path
+      let url = URL(fileURLWithPath: filePath)
+      launchFilePath = url.standardizedFileURL.path
+    }
+
     NSObject.swizzleAccessibilityBundlesOnce
     NSMenu.swizzleIsUpdatedExcludingContentTypesOnce
     NSSpellChecker.swizzleInlineCompletionEnabledOnce
@@ -31,7 +43,6 @@ final class Application: NSApplication {
     let delegate = AppDelegate()
 
     application.delegate = delegate
-    delegate.startAccessingGrantedFolder()
 
     _ = NSApplicationMain(CommandLine.argc, CommandLine.unsafeArgv)
   }

@@ -16,10 +16,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
   @IBOutlet weak var mainExtensionsMenu: NSMenu?
   @IBOutlet weak var mainWindowMenu: NSMenu?
 
-  @IBOutlet weak var copyPandocCommandMenu: NSMenu?
-  @IBOutlet weak var openFileInMenu: NSMenu?
-  @IBOutlet weak var reopenFileMenu: NSMenu?
-  @IBOutlet weak var lineEndingsMenu: NSMenu?
   @IBOutlet weak var editCommandsMenu: NSMenu?
   @IBOutlet weak var editTableOfContentsMenu: NSMenu?
   @IBOutlet weak var editFontMenu: NSMenu?
@@ -27,10 +23,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
   @IBOutlet weak var textFormatMenu: NSMenu?
   @IBOutlet weak var formatHeadersMenu: NSMenu?
 
-  @IBOutlet weak var lineEndingsLFItem: NSMenuItem?
-  @IBOutlet weak var lineEndingsCRLFItem: NSMenuItem?
-  @IBOutlet weak var lineEndingsCRItem: NSMenuItem?
-  @IBOutlet weak var fileFromClipboardItem: NSMenuItem?
   @IBOutlet weak var editUndoItem: NSMenuItem?
   @IBOutlet weak var editRedoItem: NSMenuItem?
   @IBOutlet weak var editPasteItem: NSMenuItem?
@@ -46,11 +38,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
   @IBOutlet weak var formatMathItem: NSMenuItem?
   @IBOutlet weak var formatMathBlockItem: NSMenuItem?
   @IBOutlet weak var windowFloatingItem: NSMenuItem?
-
-  @IBOutlet weak var mainUpdateItem: NSMenuItem?
-  @IBOutlet weak var presentUpdateItem: NSMenuItem?
-  @IBOutlet weak var postponeUpdateItem: NSMenuItem?
-  @IBOutlet weak var ignoreUpdateItem: NSMenuItem?
 
   private var appearanceObservation: NSKeyValueObservation?
   private var settingsWindowController: NSWindowController?
@@ -70,46 +57,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
       object: nil
     )
 
-    // App level setting for "Ask to keep changes when closing documents"
-    if let closeAlwaysConfirmsChanges = AppRuntimeConfig.closeAlwaysConfirmsChanges {
-      UserDefaults.standard.set(closeAlwaysConfirmsChanges, forKey: NSCloseAlwaysConfirmsChanges)
-    } else {
-      UserDefaults.standard.removeObject(forKey: NSCloseAlwaysConfirmsChanges)
-    }
-
-    // Register global hot key to activate the document window, if provided
-    if let hotKey = AppRuntimeConfig.mainWindowHotKey {
-      AppHotKeys.register(keyEquivalent: hotKey.key, modifiers: hotKey.modifiers) {
-        self.toggleDocumentWindowVisibility()
-      }
-    }
-
     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
       EditorReusePool.shared.warmUp()
     }
 
-    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-      self.presentUpdateItem?.title = Localized.Updater.viewReleasePage
-      self.postponeUpdateItem?.title = Localized.Updater.remindMeLater
-      self.ignoreUpdateItem?.title = Localized.Updater.skipThisVersion
-
-      Task {
-        await AppUpdater.checkForUpdates(explicitly: false)
-      }
-
-      DispatchQueue.global(qos: .utility).async {
-        let defaults = UserDefaults.standard.dictionaryRepresentation()
-        let plist = defaults.merging(AppRuntimeConfig.jsonObject) { _, rhs in rhs }
-        let fileData = try? PropertyListSerialization.data(fromPropertyList: plist, format: .xml, options: 0)
-        try? fileData?.write(to: AppCustomization.debugDirectory.fileURL.appending(path: "user-settings.xml"))
-      }
-    }
-
-    // Check for updates on a weekly basis, for users who never quit apps
-    Timer.scheduledTimer(withTimeInterval: 7 * 24 * 60 * 60, repeats: true) { _ in
-      Task {
-        await AppUpdater.checkForUpdates(explicitly: false)
-      }
+    // MarkEdit Modal: open the file specified on the command line
+    if let filePath = Application.launchFilePath {
+      openLaunchFile(path: filePath)
     }
 
     // Install uncaught exception handler
@@ -117,16 +71,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
   }
 
   func applicationShouldTerminate(_ application: NSApplication) -> NSApplication.TerminateReply {
-    if AppRuntimeConfig.autoSaveWhenIdle && NSDocumentController.shared.hasOutdatedDocuments {
-      // Terminate after all outdated documents are saved
-      Task {
-        await NSDocumentController.shared.saveOutdatedDocuments()
-        application.reply(toApplicationShouldTerminate: true)
-      }
-
-      return .terminateLater
-    }
-
+    // MarkEdit Modal: quit = discard, always terminate immediately
     return .terminateNow
   }
 
@@ -145,14 +90,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 extension AppDelegate {
   func application(_ application: NSApplication, open urls: [URL]) {
     for url in urls {
-      // https://github.com/MarkEdit-app/MarkEdit/wiki/Text-Processing#using-url-schemes
       let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
       switch components?.host {
       case "new-file":
-        // markedit://new-file?filename=Untitled&initial-content=Hello
+        // mem://new-file?filename=Untitled&initial-content=Hello
         createNewFile(queryDict: components?.queryDict)
       case "open":
-        // markedit://open or markedit://open?path=Untitled.md
+        // mem://open or mem://open?path=Untitled.md
         openFile(queryDict: components?.queryDict)
       default:
         break

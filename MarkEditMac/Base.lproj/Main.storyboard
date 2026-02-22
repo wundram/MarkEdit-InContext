@@ -11,23 +11,16 @@
                 <application id="hnw-xV-0zn" sceneMemberID="viewController">
                     <menu key="mainMenu" title="Main Menu" systemMenu="main" id="AYu-sK-qS6">
                         <items>
-                            <menuItem title="MarkEdit" id="1Xt-HY-uBw" userLabel="MarkEdit">
+                            <menuItem title="MarkEdit Modal" id="1Xt-HY-uBw" userLabel="MarkEdit Modal">
                                 <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="MarkEdit" systemMenu="apple" id="uQy-DD-JDr">
+                                <menu key="submenu" title="MarkEdit Modal" systemMenu="apple" id="uQy-DD-JDr">
                                     <items>
-                                        <menuItem title="About MarkEdit" id="5kV-Vb-QxS">
+                                        <menuItem title="About MarkEdit Modal" id="5kV-Vb-QxS">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="orderFrontStandardAboutPanel:" target="Ady-hI-5gd" id="Exp-CZ-Vem"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Check for Updates…" secondaryImage="arrow.trianglehead.2.clockwise.rotate.90.circle" catalog="system" id="s40-D9-CoM">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="checkForUpdates:" target="Voe-Tx-rLC" id="KoB-Gc-HGX"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="VOq-y0-SEH"/>
                                         <menuItem title="Preferences…" secondaryImage="gear" catalog="system" keyEquivalent="," id="BOF-NM-1cW">
                                             <connections>
                                                 <action selector="showPreferences:" target="Voe-Tx-rLC" id="NhX-ob-GbB"/>
@@ -55,12 +48,6 @@
                                                             <action selector="openDocumentsFolder:" target="Voe-Tx-rLC" id="cD9-hQ-p0k"/>
                                                         </connections>
                                                     </menuItem>
-                                                    <menuItem title="Grant Folder Access" id="hw9-Pl-u8s">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="grantFolderAccess:" target="Voe-Tx-rLC" id="NVa-7Q-Zg0"/>
-                                                        </connections>
-                                                    </menuItem>
                                                     <menuItem isSeparatorItem="YES" id="USk-ey-oWO"/>
                                                     <menuItem title="Development Guide" id="aSl-kC-hp8">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
@@ -72,7 +59,7 @@
                                             </menu>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="4je-JR-u6R"/>
-                                        <menuItem title="Hide MarkEdit" keyEquivalent="h" id="Olw-nP-bQN">
+                                        <menuItem title="Hide MarkEdit Modal" keyEquivalent="h" id="Olw-nP-bQN">
                                             <connections>
                                                 <action selector="hide:" target="Ady-hI-5gd" id="PnN-Uc-m68"/>
                                             </connections>
@@ -90,7 +77,7 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="kCx-OE-vgT"/>
-                                        <menuItem title="Quit MarkEdit" keyEquivalent="q" id="4sb-4s-VLi">
+                                        <menuItem title="Quit MarkEdit Modal" keyEquivalent="q" id="4sb-4s-VLi">
                                             <connections>
                                                 <action selector="terminate:" target="Ady-hI-5gd" id="Te7-pn-YzF"/>
                                             </connections>
@@ -102,257 +89,15 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="File" id="bib-Uj-vzu">
                                     <items>
-                                        <menuItem title="New" keyEquivalent="n" id="Was-JA-tGl">
-                                            <connections>
-                                                <action selector="newDocument:" target="Ady-hI-5gd" id="4Si-XN-c54"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="New File from Clipboard" secondaryImage="list.bullet.clipboard" catalog="system" keyEquivalent="n" id="0NS-5A-glR">
-                                            <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
-                                            <connections>
-                                                <action selector="newFileFromClipboard:" target="Voe-Tx-rLC" id="pJC-h1-fZk"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="New Tab" secondaryImage="macwindow.on.rectangle" catalog="system" keyEquivalent="t" id="dHZ-CH-KLC">
-                                            <connections>
-                                                <action selector="createNewTab:" target="Ady-hI-5gd" id="ybh-8g-tSk"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Open…" keyEquivalent="o" id="IAo-SY-fd9">
-                                            <connections>
-                                                <action selector="openDocument:" target="Ady-hI-5gd" id="bVn-NM-KNZ"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Open Recent" id="tXI-mr-wws">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <menu key="submenu" title="Open Recent" systemMenu="recentDocuments" id="oas-Oc-fiZ">
-                                                <items>
-                                                    <menuItem title="Clear Menu" id="vNY-rz-j42">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="clearRecentDocuments:" target="Ady-hI-5gd" id="Daa-9d-B3U"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                </items>
-                                            </menu>
-                                        </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="m54-Is-iLE"/>
-                                        <menuItem title="Close" keyEquivalent="w" id="DVo-aG-piG">
-                                            <connections>
-                                                <action selector="performClose:" target="Ady-hI-5gd" id="HmO-Ls-i7Q"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Save…" keyEquivalent="s" id="pxx-59-PXV">
+                                        <menuItem title="Save and Exit" keyEquivalent="s" id="pxx-59-PXV">
                                             <connections>
                                                 <action selector="saveDocument:" target="Ady-hI-5gd" id="teZ-XB-qJY"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Save All" secondaryImage="square.and.arrow.down.on.square" catalog="system" keyEquivalent="s" id="5W0-LW-fUP">
-                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                        <menuItem title="Save a Copy…" keyEquivalent="S" id="Bw7-FT-i3A">
                                             <connections>
-                                                <action selector="saveAllDocuments:" target="Voe-Tx-rLC" id="6Ov-7Z-60H"/>
+                                                <action selector="saveCopy:" target="Ady-hI-5gd" id="mDf-zr-I0C"/>
                                             </connections>
-                                        </menuItem>
-                                        <menuItem title="Save As…" keyEquivalent="S" id="Bw7-FT-i3A">
-                                            <connections>
-                                                <action selector="saveDocumentAs:" target="Ady-hI-5gd" id="mDf-zr-I0C"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Revert to Saved" keyEquivalent="r" id="KaW-ft-85H">
-                                            <connections>
-                                                <action selector="revertDocumentToSaved:" target="Ady-hI-5gd" id="iJ3-Pv-kwq"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="aJh-i4-bef"/>
-                                        <menuItem title="Page Setup…" keyEquivalent="P" id="qIS-W8-SiK">
-                                            <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
-                                            <connections>
-                                                <action selector="runPageLayout:" target="Ady-hI-5gd" id="Din-rz-gC5"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Print…" keyEquivalent="p" id="aTl-1u-JFS">
-                                            <connections>
-                                                <action selector="printDocument:" target="Ady-hI-5gd" id="e9t-Sg-arU"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="11p-zA-ME1"/>
-                                        <menuItem title="Copy Path" id="jv9-dC-jQp">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <menu key="submenu" title="Copy Path" id="5HO-Fv-Q1j">
-                                                <items>
-                                                    <menuItem title="File Path" id="BxS-9Q-HQd">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="copyFilePath:" target="Ady-hI-5gd" id="WYy-q2-w3O"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="Folder Path" id="zVr-EF-hMY">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="copyFolderPath:" target="Ady-hI-5gd" id="GTp-R9-S6g"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                </items>
-                                            </menu>
-                                        </menuItem>
-                                        <menuItem title="Copy Pandoc Command" id="53x-nK-wnX">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <menu key="submenu" title="Copy Pandoc Command" id="QZC-LS-WMo">
-                                                <items>
-                                                    <menuItem title="Export to HTML" identifier="html" id="iIq-nl-rwB">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="copyPandocCommand:" target="Ady-hI-5gd" id="XzJ-IH-DlB"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="Export to PDF" identifier="pdf" id="oc0-ce-Yrd">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="copyPandocCommand:" target="Ady-hI-5gd" id="exM-gT-yXb"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="Export to Word Docx" identifier="docx" id="Ukm-Sm-nrt">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="copyPandocCommand:" target="Ady-hI-5gd" id="m4b-D9-ogv"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="Export to RTF" identifier="rtf" id="QVA-GW-ruk">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="copyPandocCommand:" target="Ady-hI-5gd" id="vGl-GC-xNL"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="Export to EPUB" identifier="epub" id="ORv-QM-Kju">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="copyPandocCommand:" target="Ady-hI-5gd" id="Azb-UJ-tCG"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem isSeparatorItem="YES" id="KaR-GR-i0Y"/>
-                                                    <menuItem title="Learn More…" id="yv7-Am-Rb2">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="learnPandoc:" target="Ady-hI-5gd" id="z8q-nL-VUU"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                </items>
-                                            </menu>
-                                        </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="cON-X6-d1V"/>
-                                        <menuItem title="Reveal in Finder" keyEquivalent="r" id="gwQ-Vq-avP">
-                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
-                                            <connections>
-                                                <action selector="revealInFinder:" target="Ady-hI-5gd" id="bfk-c8-dF4"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Open In…" hidden="YES" id="GdB-IP-6C8">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <menu key="submenu" title="Open In…" id="Tuy-2U-frg">
-                                                <connections>
-                                                    <outlet property="delegate" destination="Voe-Tx-rLC" id="pvg-ql-wd5"/>
-                                                </connections>
-                                            </menu>
-                                        </menuItem>
-                                        <menuItem title="Reopen with Encoding" hidden="YES" id="XQw-pS-pD7">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <menu key="submenu" title="Reopen with Encoding" id="sPG-vJ-QST">
-                                                <connections>
-                                                    <outlet property="delegate" destination="Voe-Tx-rLC" id="hHL-9N-vVc"/>
-                                                </connections>
-                                            </menu>
-                                        </menuItem>
-                                        <menuItem title="Line Endings" hidden="YES" id="EEg-eg-6lJ">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <menu key="submenu" title="Line Endings" id="7eH-ja-yIc">
-                                                <items>
-                                                    <menuItem title="macOS / Unix (LF)" tag="1" id="qOk-v8-kKx">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="setLineEndings:" target="Ady-hI-5gd" id="pAc-py-2Iq"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="Windows (CRLF)" tag="2" id="mc2-DH-5Iy">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="setLineEndings:" target="Ady-hI-5gd" id="hzf-R2-mT4"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="Classic Mac OS (CR)" tag="3" id="ANU-wC-fmd">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="setLineEndings:" target="Ady-hI-5gd" id="qaT-fE-BUa"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                </items>
-                                                <connections>
-                                                    <outlet property="delegate" destination="Voe-Tx-rLC" id="jrI-g6-JfY"/>
-                                                </connections>
-                                            </menu>
-                                        </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="McZ-Mt-f0I"/>
-                                        <menuItem title="Grant Folder Access" id="j7w-ok-RLg">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="grantFolderAccess:" target="Voe-Tx-rLC" id="RGE-SD-4YU"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Purge History Versions" id="yfL-ea-k7X">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <menu key="submenu" title="Purge History Versions" id="Rjg-ZG-COT">
-                                                <items>
-                                                    <menuItem title="Last Edited 2 Weeks Ago" tag="14" id="B2E-9g-fPK">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="deleteVersionsByDate:" target="Ady-hI-5gd" id="INm-RM-YZV"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="Last Edited 1 Month Ago" tag="30" id="yOb-Z8-aCk">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="deleteVersionsByDate:" target="Ady-hI-5gd" id="rsw-td-GBi"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="Last Edited 3 Months Ago" tag="90" id="2CK-gf-sE8">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="deleteVersionsByDate:" target="Ady-hI-5gd" id="T7q-AK-ZAw"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="Last Edited 6 Months Ago" tag="182" id="hLx-6U-DoY">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="deleteVersionsByDate:" target="Ady-hI-5gd" id="rb1-Kb-pSj"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="Last Edited 1 Year Ago" tag="365" id="PNm-e0-aoZ">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="deleteVersionsByDate:" target="Ady-hI-5gd" id="Btf-v1-nyq"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem isSeparatorItem="YES" id="Q5e-Bs-xWP"/>
-                                                    <menuItem title="Keep Up to 50 Versions" tag="50" id="vbS-fI-FfG">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="deleteVersionsByCapacity:" target="Ady-hI-5gd" id="l8h-Zb-nAN"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="Keep Up to 100 Versions" tag="100" id="BlA-2z-1dH">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="deleteVersionsByCapacity:" target="Ady-hI-5gd" id="d69-4S-wWE"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem isSeparatorItem="YES" id="jyj-QW-N33"/>
-                                                    <menuItem title="All Local Versions" id="EoI-17-lrY">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="deleteVersionsByDate:" target="Ady-hI-5gd" id="ydj-dc-fsp"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                </items>
-                                            </menu>
                                         </menuItem>
                                     </items>
                                     <connections>
@@ -978,7 +723,7 @@ Gw
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Help" systemMenu="help" id="F2S-fz-NVQ">
                                     <items>
-                                        <menuItem title="MarkEdit Help" keyEquivalent="?" id="FKE-Sm-Kum">
+                                        <menuItem title="MarkEdit Modal Help" keyEquivalent="?" id="FKE-Sm-Kum">
                                             <connections>
                                                 <action selector="showHelp:" target="Voe-Tx-rLC" id="ba9-aC-ghc"/>
                                             </connections>
@@ -1023,7 +768,6 @@ Gw
                 </application>
                 <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="MarkEdit" customModuleProvider="target">
                     <connections>
-                        <outlet property="copyPandocCommandMenu" destination="QZC-LS-WMo" id="GLu-1M-G8M"/>
                         <outlet property="editCommandsMenu" destination="9un-8n-UQZ" id="TkW-D6-2rF"/>
                         <outlet property="editFindMenu" destination="1b7-l0-nxx" id="qe6-lW-EOG"/>
                         <outlet property="editFontMenu" destination="VwK-Nx-wgD" id="gtE-IA-gOo"/>
@@ -1035,7 +779,6 @@ Gw
                         <outlet property="editTableOfContentsMenu" destination="BxI-nv-Xa5" id="lTp-Xn-8tg"/>
                         <outlet property="editTypewriterItem" destination="Cvo-jv-iDg" id="1vS-bx-fNh"/>
                         <outlet property="editUndoItem" destination="dRJ-4n-Yzg" id="Qet-C4-yT2"/>
-                        <outlet property="fileFromClipboardItem" destination="0NS-5A-glR" id="hxk-Eb-8YJ"/>
                         <outlet property="formatBulletItem" destination="ANX-uP-CA4" id="4cQ-3z-hPG"/>
                         <outlet property="formatCodeBlockItem" destination="QOM-rI-Bxj" id="4Dy-YC-z6y"/>
                         <outlet property="formatCodeItem" destination="Ibb-aP-jnQ" id="4kt-Sh-zOv"/>
@@ -1044,20 +787,10 @@ Gw
                         <outlet property="formatMathItem" destination="wIF-eb-cez" id="iQQ-q9-gor"/>
                         <outlet property="formatNumberingItem" destination="vhv-qY-5Gc" id="rOt-cw-00U"/>
                         <outlet property="formatTodoItem" destination="DZc-Ee-Asp" id="O5Q-gx-Kg0"/>
-                        <outlet property="ignoreUpdateItem" destination="he5-WD-tCA" id="Zjr-Ee-iYb"/>
-                        <outlet property="lineEndingsCRItem" destination="ANU-wC-fmd" id="mWb-3A-dYc"/>
-                        <outlet property="lineEndingsCRLFItem" destination="mc2-DH-5Iy" id="w6F-ls-MGF"/>
-                        <outlet property="lineEndingsLFItem" destination="qOk-v8-kKx" id="4t7-oc-c7R"/>
-                        <outlet property="lineEndingsMenu" destination="7eH-ja-yIc" id="CYf-hv-ZvG"/>
                         <outlet property="mainEditMenu" destination="W48-6f-4Dl" id="xUc-Fy-SjE"/>
                         <outlet property="mainExtensionsMenu" destination="nkD-z6-yjV" id="40H-WY-xHu"/>
                         <outlet property="mainFileMenu" destination="bib-Uj-vzu" id="cNR-Lu-ST1"/>
-                        <outlet property="mainUpdateItem" destination="ETL-k6-svK" id="rQZ-1x-GRC"/>
                         <outlet property="mainWindowMenu" destination="Td7-aD-5lo" id="9j1-c6-lEO"/>
-                        <outlet property="openFileInMenu" destination="Tuy-2U-frg" id="Udj-25-y2I"/>
-                        <outlet property="postponeUpdateItem" destination="r3b-uF-Yy9" id="8kS-ni-Kae"/>
-                        <outlet property="presentUpdateItem" destination="CtF-Ha-tmF" id="2Nf-Yp-0T9"/>
-                        <outlet property="reopenFileMenu" destination="sPG-vJ-QST" id="6e4-Zg-kFp"/>
                         <outlet property="textFormatMenu" destination="yy7-cF-JbT" id="FfG-yi-NE6"/>
                         <outlet property="windowFloatingItem" destination="0C5-FE-fvI" id="hM7-gl-t1f"/>
                     </connections>

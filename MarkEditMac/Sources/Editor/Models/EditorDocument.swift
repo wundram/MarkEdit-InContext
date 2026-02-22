@@ -6,7 +6,6 @@
 
 import AppKit
 import MarkEditKit
-import FileVersion
 import TextBundle
 
 /**
@@ -58,8 +57,7 @@ final class EditorDocument: NSDocument {
   }
 
   var shouldSaveWhenIdle: Bool {
-    // Saving documents without a fileURL would bring up the dialog
-    AppRuntimeConfig.autoSaveWhenIdle && fileURL != nil
+    false // MarkEdit Modal: no auto-save
   }
 
   private var textBundle: TextBundleWrapper?
@@ -168,7 +166,7 @@ final class EditorDocument: NSDocument {
 
 extension EditorDocument {
   override class var autosavesInPlace: Bool {
-    true
+    false
   }
 
   override class func canConcurrentlyReadDocuments(ofType type: String) -> Bool {
@@ -207,51 +205,19 @@ extension EditorDocument {
     }
   }
 
-  override func updateChangeCount(_ change: NSDocument.ChangeType) {
-    // The "Edited" label is hidden when changes are saved periodically
-    super.updateChangeCount(shouldSaveWhenIdle ? .changeCleared : change)
-  }
-
   override func canAsynchronouslyWrite(to url: URL, ofType typeName: String, for saveOperation: NSDocument.SaveOperationType) -> Bool {
     true
   }
 
   override func canClose(withDelegate delegate: Any, shouldClose shouldCloseSelector: Selector?, contextInfo: UnsafeMutableRawPointer?) {
-    let isNewFile = fileURL == nil
-    let shouldClose: Selector? = {
-      if !isNewFile && !isTerminating && closeAlwaysConfirmsChanges {
-        return #selector(confirmsChanges(_:shouldClose:))
-      }
-
-      return shouldCloseSelector
-    }()
-
-    let canClose = {
-      super.canClose(
-        withDelegate: delegate,
-        shouldClose: shouldClose,
-        contextInfo: contextInfo
+    // MarkEdit Modal: always allow close without save dialog (discard-and-exit)
+    if let shouldCloseSelector {
+      let delegateObject = delegate as AnyObject
+      let method = unsafeBitCast(
+        delegateObject.method(for: shouldCloseSelector),
+        to: (@convention(c) (AnyObject, Selector, NSDocument, Bool, UnsafeMutableRawPointer?) -> Void).self
       )
-    }
-
-    // Closing a new document, force sync to make sure the content is propagated.
-    //
-    // Don't use `isDraft` here because it's false when closing a document with no files on disk.
-    if isNewFile {
-      return updateContent(saveAction: canClose)
-    }
-
-    // Explicitly save the content before closing.
-    //
-    // Case 1: The content isn't outdated, so auto-saving won't trigger.
-    // Case 2: Occasionally, the ".sb" backup file isn't properly cleaned up.
-    if (shouldSaveWhenIdle && isOutdated) || (!closeAlwaysConfirmsChanges && isDocumentEdited) {
-      return saveContent(completion: canClose)
-    }
-
-    // General cases
-    Task { @MainActor in
-      canClose()
+      method(delegateObject, shouldCloseSelector, self, true, contextInfo)
     }
   }
 
@@ -296,8 +262,6 @@ extension EditorDocument {
           savePanel?.enforceUniformType(value.uniformType)
         case .textEncoding(let value):
           self?.suggestedTextEncoding = value
-        default:
-          Logger.assertFail("Invalid change: \(result)")
         }
       }
     } else {
@@ -332,35 +296,44 @@ extension EditorDocument {
     }
   }
 
-  // We don't have a sync way to get the text, override save and autosave to do an async approach.
-  //
-  // Note that, by only overriding the "saveToURL" method can bring hang issues.
+  // MarkEdit Modal: save-and-quit behavior.
+  // We sync content from the WebView, write to disk, then terminate.
   override func save(_ sender: Any?) {
-    guard isOutdated || needsFormatting else {
-      super.save(sender)
-      markContentClean()
-      return
+    saveContent(sender: sender, userInitiated: true) {
+      NSApp.terminate(nil)
     }
-
-    saveContent(sender: sender, userInitiated: true)
   }
 
   override func autosave(withImplicitCancellability implicitlyCancellable: Bool) async throws {
-    if isOutdated {
-      await updateContent()
-    }
+    // MarkEdit Modal: autosave is disabled (explicit save only)
+  }
 
-    // The default autosave doesn't work when the app is about to terminate,
-    // it is because we have to do it in an asynchronous way.
-    //
-    // To work around this, check a flag to save the document manually.
-    if !hasBeenReverted && isTerminating && hasUnautosavedChanges, let fileURL, let fileType {
-      try? writeSafely(to: fileURL, ofType: fileType, for: .autosaveAsOperation)
-      fileModificationDate = .now // Prevent immediate presentedItemDidChange calls
-    }
-
+  /// Save a Copy: present NSSavePanel, write to chosen path, keep editing original
+  @IBAction func saveCopy(_ sender: Any?) {
     Task { @MainActor in
-      try await super.autosave(withImplicitCancellability: implicitlyCancellable)
+      // Sync content from WebView first
+      await updateContent(userInitiated: true)
+
+      let savePanel = NSSavePanel()
+      savePanel.nameFieldStringValue = fileURL?.lastPathComponent ?? "Untitled.md"
+      savePanel.allowedContentTypes = [.plainText]
+      savePanel.allowsOtherFileTypes = true
+
+      guard let window = hostViewController?.view.window else {
+        return
+      }
+
+      let response = await savePanel.beginSheetModal(for: window)
+      guard response == .OK, let targetURL = savePanel.url else {
+        return
+      }
+
+      do {
+        let fileType = self.fileType ?? "net.daringfireball.markdown"
+        try writeSafely(to: targetURL, ofType: fileType, for: .saveToOperation)
+      } catch {
+        Logger.log(.error, "Save a Copy failed: \(error.localizedDescription)")
+      }
     }
   }
 
@@ -395,121 +368,6 @@ extension EditorDocument {
   override func revert(toContentsOf url: URL, ofType typeName: String) throws {
     revertedDate = .now
     try super.revert(toContentsOf: url, ofType: typeName)
-  }
-}
-
-// MARK: - Scripting
-
-extension EditorDocument {
-  /// Handle save operations from AppleScript.
-  ///
-  /// Override to catch invalid output paths early so we can present more informative errors.
-  override func handleSave(_ command: NSScriptCommand) -> Any? {
-    guard let fileURL = command.evaluatedArguments?["File"] as? URL else {
-      // Save without predefined destination (will open save panel if needed)
-      return super.handleSave(command)
-    }
-
-    let inputExtension = fileURL.pathExtension.lowercased()
-
-    // Support extension-less paths by bypassing file type validation
-    if inputExtension.isEmpty {
-      Task { @MainActor in
-        try await save(to: fileURL.deletingPathExtension(), ofType: "", for: .saveOperation)
-      }
-      return nil
-    }
-
-    // Provided limited support for the 'as' parameter
-    if let desiredType = command.evaluatedArguments?["FileType"] as? String {
-      let desiredExtension = NewFilenameExtension.preferredExtension(for: desiredType).rawValue
-      if inputExtension == desiredExtension {
-        return super.handleSave(command)
-      }
-
-      // Raise error because we cannot adjust the extension due to sandbox restrictions
-      let scriptError = ScriptingError.extensionMismatch(
-        expectedExtension: desiredExtension,
-        outputType: desiredType
-      )
-
-      scriptError.applyToCommand(command)
-      return nil
-    }
-
-    let isValidExtension = NewFilenameExtension.allCases.contains {
-      $0.rawValue == inputExtension
-    } || (textBundle != nil && inputExtension == "textbundle")
-
-    guard isValidExtension else {
-      let scriptError = ScriptingError.invalidDestination(fileURL, document: self)
-      scriptError.applyToCommand(command)
-      return nil
-    }
-
-    return super.handleSave(command)
-  }
-}
-
-// MARK: - Version Browsing
-
-extension EditorDocument: FileVersionPickerDelegate {
-  override func browseVersions(_ sender: Any?) {
-    guard let fileURL else {
-      return Logger.assertFail("Missing fileURL for document: \(self)")
-    }
-
-    let localVersions = {
-      let otherVersions = NSFileVersion.otherVersionsOfItem(at: fileURL) ?? []
-      Logger.log(.debug, "Found \(otherVersions.count) local versions")
-
-      if otherVersions.isEmpty, let currentVersion = NSFileVersion.currentVersionOfItem(at: fileURL) {
-        return [currentVersion]
-      }
-
-      let sortedVersions = otherVersions.newestToOldest()
-      let differentIndex = sortedVersions.firstIndex {
-        // Find the first version that differs from the current one
-        (try? Data(contentsOf: $0.url))?.toString() != stringValue
-      }
-
-      return Array(sortedVersions.suffix(from: differentIndex ?? 0))
-    }()
-
-    guard !localVersions.isEmpty else {
-      return Logger.assertFail("File \(fileURL) has no local versions")
-    }
-
-    let picker = FileVersionPicker(
-      modernStyle: AppDesign.modernStyle,
-      fileURL: fileURL,
-      currentText: stringValue,
-      localVersions: localVersions,
-      localizable: FileVersionLocalizable(
-        previous: Localized.General.previous,
-        next: Localized.General.next,
-        cancel: Localized.General.cancel,
-        revertTitle: Localized.FileVersion.revertTitle,
-        modeTitles: Localized.FileVersion.modeTitles
-      ),
-      delegate: self
-    )
-
-    hostViewController?.presentAsSheet(picker)
-  }
-
-  func fileVersionPicker(_ picker: FileVersionPicker, didPickVersion version: NSFileVersion) {
-    guard let contents = try? Data(contentsOf: version.url).toString() else {
-      return Logger.assertFail("Failed to get file contents of version: \(version)")
-    }
-
-    stringValue = contents
-    hostViewController?.resetEditor()
-    saveContent()
-  }
-
-  func fileVersionPicker(_ picker: FileVersionPicker, didBecomeSheet: Bool) {
-    hostViewController?.setHasModalSheet(value: didBecomeSheet)
   }
 }
 
@@ -587,10 +445,6 @@ extension EditorDocument {
 private extension EditorDocument {
   var bridge: WebModuleBridge? {
     hostViewController?.bridge
-  }
-
-  var closeAlwaysConfirmsChanges: Bool {
-    UserDefaults.standard.bool(forKey: NSCloseAlwaysConfirmsChanges)
   }
 
   var hasBeenReverted: Bool {

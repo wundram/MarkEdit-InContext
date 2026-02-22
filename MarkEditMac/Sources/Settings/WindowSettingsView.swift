@@ -11,7 +11,6 @@ import SettingsUI
 @MainActor
 struct WindowSettingsView: View {
   @State private var toolbarMode = AppPreferences.Window.toolbarMode
-  @State private var tabbingMode = AppPreferences.Window.tabbingMode
   @State private var reduceTransparency = AppPreferences.Window.reduceTransparency
 
   var body: some View {
@@ -24,16 +23,6 @@ struct WindowSettingsView: View {
         }
         .onChange(of: toolbarMode) {
           AppPreferences.Window.toolbarMode = toolbarMode
-        }
-        .formMenuPicker()
-
-        Picker(Localized.Settings.tabbingMode, selection: $tabbingMode) {
-          Text(Localized.Settings.automatic).tag(NSWindow.TabbingMode.automatic)
-          Text(Localized.Settings.preferred).tag(NSWindow.TabbingMode.preferred)
-          Text(Localized.Settings.disallowed).tag(NSWindow.TabbingMode.disallowed)
-        }
-        .onChange(of: tabbingMode) {
-          AppPreferences.Window.tabbingMode = tabbingMode
         }
         .formMenuPicker()
       }

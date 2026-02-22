@@ -19,39 +19,16 @@ enum AppPreferences {
     @Storage(key: "general.appearance", defaultValue: .system)
     static var appearance: Appearance
 
-    @Storage(key: "general.new-window-behavior", defaultValue: .openDocument)
-    static var newWindowBehavior: NewWindowBehavior
-
     @Storage(key: "general.new-filename-extension", defaultValue: .md)
     static var newFilenameExtension: NewFilenameExtension
 
     @Storage(key: "general.default-text-encoding", defaultValue: .utf8)
     static var defaultTextEncoding: EditorTextEncoding
 
-    @Storage(key: "general.show-hidden-files", defaultValue: false)
-    static var showHiddenFiles: Bool
-
     @Storage(key: "general.default-line-endings", defaultValue: .lf)
     static var defaultLineEndings: LineEndings {
       didSet {
         performUpdates { $0.setDefaultLineBreak(defaultLineEndings.characters) }
-      }
-    }
-
-    /**
-     Bookmark data used to access files outside the app sandbox.
-
-     Due to historical issues, this can be either a file bookmark, or an array of file bookmarks.
-     */
-    @Storage(key: "general.granted-folder-bookmark", defaultValue: nil)
-    static var grantedFolderBookmark: Data?
-
-    static var quitAlwaysKeepsWindows: Bool {
-      get {
-        UserDefaults.standard.bool(forKey: NSQuitAlwaysKeepsWindows)
-      }
-      set {
-        UserDefaults.standard.set(newValue, forKey: NSQuitAlwaysKeepsWindows)
       }
     }
   }
@@ -219,13 +196,6 @@ enum AppPreferences {
       }
     }
 
-    @Storage(key: "window.tabbing-mode", defaultValue: .automatic)
-    static var tabbingMode: NSWindow.TabbingMode {
-      didSet {
-        performUpdates { $0.view.window?.tabbingMode = tabbingMode }
-      }
-    }
-
     @Storage(key: "window.reduce-transparency", defaultValue: false)
     static var reduceTransparency: Bool {
       didSet {
@@ -241,14 +211,6 @@ enum AppPreferences {
         }
       }
     }
-  }
-
-  enum Updater {
-    @Storage(key: "updater.skipped-versions", defaultValue: Set())
-    static var skippedVersions: Set<String>
-
-    @Storage(key: "updater.completely-disabled", defaultValue: false)
-    static var completelyDisabled: Bool
   }
 }
 
@@ -386,11 +348,6 @@ enum LineHeight: Codable {
   }
 }
 
-enum NewWindowBehavior: Codable {
-  case openDocument
-  case newDocument
-}
-
 enum NewFilenameExtension: String, Codable, CaseIterable {
   case md
   case markdown
@@ -417,8 +374,6 @@ enum ToolbarMode: Codable {
   case compact
   case hidden
 }
-
-extension NSWindow.TabbingMode: @retroactive Codable {}
 
 // MARK: - Private
 

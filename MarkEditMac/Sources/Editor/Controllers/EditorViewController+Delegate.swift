@@ -127,12 +127,8 @@ extension EditorViewController: EditorModuleCoreDelegate {
       return
     }
 
-    if document?.shouldSaveWhenIdle == true {
-      document?.saveContent()
-      bridge.history.markContentClean()
-    } else {
-      document?.updateContent()
-    }
+    // MarkEdit Modal: no auto-save on idle, just sync content
+    document?.updateContent()
   }
 
   func editorCoreBackgroundColorDidChange(_ sender: EditorModuleCore, color: UInt32, alpha: Double) {

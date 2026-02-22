@@ -258,7 +258,8 @@ private extension EditorViewController {
   }
 
   var copyPandocCommandItem: NSToolbarItem {
-    .with(identifier: .copyPandocCommand, menu: NSApp.appDelegate?.copyPandocCommandMenu?.copiedMenu)
+    // MarkEdit Modal: Pandoc support removed
+    .with(identifier: .copyPandocCommand, menu: nil)
   }
 
   var writingToolsItem: NSToolbarItem? {

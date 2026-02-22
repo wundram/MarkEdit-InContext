@@ -43,7 +43,7 @@ final class EditorWindow: NSWindow {
     super.awakeFromNib()
     toolbar = NSToolbar() // Required for multi-tab layout
     toolbarMode = AppPreferences.Window.toolbarMode
-    tabbingMode = AppPreferences.Window.tabbingMode
+    tabbingMode = .disallowed
     reduceTransparency = AppDesign.reduceTransparency
   }
 

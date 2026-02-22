@@ -93,7 +93,6 @@ enum Localized {
     static let gotoLineHelp = String(localized: "Enter the line number and hit return", comment: "Help text for goto line window")
     static let fileExtension = String(localized: "File Extension:", comment: "Label for save panel accessory view (shorter than 'Filename Extension' to avoid save panel layout issues)")
     static let textEncoding = String(localized: "Text Encoding:", comment: "Label for save panel accessory view")
-    static let showHiddenFiles = String(localized: "Show Hidden Files", comment: "Label for save panel accessory view")
   }
 
   enum Statistics {
@@ -176,9 +175,6 @@ enum Localized {
     static let system = String(localized: "System", comment: "Follow the system appearance")
     static let light = String(localized: "Light", comment: "Always use light mode for the app")
     static let dark = String(localized: "Dark", comment: "Always use dark mode for the app")
-    static let newWindowBehavior = String(localized: "New Window Behavior:", comment: "Behavior when creating new windows")
-    static let windowRestoration = String(localized: "Window Restoration:", comment: "Label for window restoration options")
-    static let quitAlwaysKeepsWindows = String(localized: "Quit always keeps windows", comment: "Whether to keep windows when quit the app")
     static let newFilenameExtension = String(localized: "New Filename Extension:", comment: "Filename extension for new files")
     static let defaultTextEncoding = String(localized: "Default Text Encoding:", comment: "Text encoding for opening and saving files")
     static let defaultLineEndings = String(localized: "Default Line Endings:", comment: "Line endings for creating new files")
@@ -192,50 +188,8 @@ enum Localized {
     static let normalMode = String(localized: "Normal", comment: "Normal mode for window toolbar")
     static let compactMode = String(localized: "Compact", comment: "Compact mode for window toolbar")
     static let hiddenMode = String(localized: "Hidden", comment: "Hidden mode for window toolbar")
-    static let tabbingMode = String(localized: "Tabbing Mode:", comment: "Label for window tabbing mode settings")
-    static let automatic = String(localized: "Automatic", comment: "Automatic window tabbing mode")
-    static let preferred = String(localized: "Preferred", comment: "Preferred window tabbing mode")
-    static let disallowed = String(localized: "Disallowed", comment: "Disallowed window tabbing mode")
     static let reduceTransparencyLabel = String(localized: "Reduce Transparency:", comment: "Label for the option to reduce window transparency")
     static let reduceTransparencyDescription = String(localized: "Remove the toolbar blur", comment: "Explanation for the option to reduce window transparency")
-  }
-
-  enum FileVersion {
-    static let revertTitle = String(localized: "Revert to This Version", comment: "Title for button to select a file version")
-    static let modeTitles = [
-      String(localized: "Diff Lines", comment: "Diff by lines"),
-      String(localized: "Diff Words", comment: "Diff by words"),
-      String(localized: "Diff Chars", comment: "Diff by characters"),
-    ]
-    static let noVersionsTitle = String(localized: "No versions match the specified condition.", comment: "Alert title for no versions found")
-    static let foundVersionsFormat = String(localized: "Found %lld versions, would you like to delete them?", comment: "Alert title (format) for number of versions found")
-    static let cannotBeUndone = String(localized: "This action cannot be undone.", comment: "Alert message for cannot undo")
-  }
-
-  enum Scripting {
-    static let missingCommandErrorMessage = String(localized: "Couldn’t find a command to handle incoming Apple Event.", comment: "Script error when MarkEdit has no command to handle the incoming Apple Event")
-    static let missingArgumentErrorMessage = String(localized: "Argument “%@” not found in event descriptor, the descriptor is likely malformed.", comment: "Script error when a command argument is missing due to a corrupted Apple Event")
-    static let editorNotFoundErrorMessage = String(localized: "No editor for document “%@” found.", comment: "Script error when MarkEdit cannot find the editor view to run document commands in")
-    static let jsEvaluationErrorMessage = String(localized: "JavaScript evaluation failed at line %d, column %d: %@", comment: "Script error when JavaScript evaluation raises a detailed error")
-    static let unknownJSErrorMessage = String(localized: "JavaScript evaluation failed for an unknown reason.", comment: "Script error when JavaScript evaluation raises an error with no details")
-    static let invalidDestinationErrorMessage = String(localized: "Cannot export files with extension “%@”, supported extensions: %@.", comment: "Script error when attempting to save files with an unsupported extension")
-    static let extensionMismatchErrorMessage = String(localized: "Wrong file extension for type “%@”, use “.%@” instead.", comment: "Script save error when the path extension does not match the output type")
-  }
-
-  enum Updater {
-    static let upToDateTitle = String(localized: "You’re up-to-date!", comment: "Title for the up-to-date info")
-    static let upToDateMessage = String(localized: "MarkEdit %@ is currently the latest version.", comment: "Message for the up-to-date info")
-    static let newVersionAvailable = String(localized: "MarkEdit %@ is available!", comment: "Title for new version available")
-    static let updateFailedTitle = String(localized: "Failed to get the update.", comment: "Title for failed to get the update")
-    static let updateFailedMessage = String(localized: "Please check your network connection or get the latest release from the version history.", comment: "Message for failed to get the update")
-    static let needsOSUpdateMessage = String(localized: "This release requires macOS %@ or later and cannot be installed without upgrading your operating system.", comment: "Message for minimum required OS version")
-    static let newVersionOut = String(localized: "🎉 %@ is out", comment: "Title format for new version is out")
-    static let viewReleasePage = String(localized: "View Release Page", comment: "Title for the \"View Release Page\" button")
-    static let notNow = String(localized: "Not Now", comment: "Title for the \"Not Now\" button")
-    static let remindMeLater = String(localized: "Remind Me Later", comment: "Title for the \"Remind Me Later\" button")
-    static let skipThisVersion = String(localized: "Skip This Version", comment: "Title for the \"Skip This Version\" button")
-    static let disableUpdateChecks = String(localized: "Disable Update Checks", comment: "Title for the \"Disable Update Checks\" button")
-    static let checkVersionHistory = String(localized: "Check Version History", comment: "Title for the \"Check Version History\" button")
   }
 }
 

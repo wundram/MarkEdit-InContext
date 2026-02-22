@@ -19,20 +19,7 @@ enum AppRuntimeConfig {
       case blur = "blur"
     }
 
-    enum UpdateBehavior: String, Codable {
-      case quiet = "quiet"
-      case notify = "notify"
-      case never = "never"
-    }
-
-    struct HotKey: Codable {
-      let key: String
-      let modifiers: [String]
-    }
-
     let autoCharacterPairs: Bool?
-    let autoSaveWhenIdle: Bool?
-    let closeAlwaysConfirmsChanges: Bool?
     let indentBehavior: EditorIndentBehavior?
     let writingToolsBehavior: String?
     let headerFontSizeDiffs: [Double]?
@@ -43,17 +30,11 @@ enum AppRuntimeConfig {
     let customToolbarItems: [CustomToolbarItem]?
     let useClassicInterface: Bool?
     let visualEffectType: VisualEffectType?
-    let updateBehavior: UpdateBehavior?
-    let checksForUpdates: Bool? // [Deprecated] Kept for backward compatibility
-    let defaultOpenDirectory: String?
     let defaultSaveDirectory: String?
     let disableCorsRestrictions: Bool?
-    let mainWindowHotKey: HotKey?
 
     enum CodingKeys: String, CodingKey {
       case autoCharacterPairs = "editor.autoCharacterPairs"
-      case autoSaveWhenIdle = "editor.autoSaveWhenIdle"
-      case closeAlwaysConfirmsChanges = "editor.closeAlwaysConfirmsChanges"
       case indentBehavior = "editor.indentBehavior"
       case writingToolsBehavior = "editor.writingToolsBehavior"
       case headerFontSizeDiffs = "editor.headerFontSizeDiffs"
@@ -64,12 +45,8 @@ enum AppRuntimeConfig {
       case customToolbarItems = "editor.customToolbarItems"
       case useClassicInterface = "general.useClassicInterface"
       case visualEffectType = "general.visualEffectType"
-      case updateBehavior = "general.updateBehavior"
-      case checksForUpdates = "general.checksForUpdates"
-      case defaultOpenDirectory = "general.defaultOpenDirectory"
       case defaultSaveDirectory = "general.defaultSaveDirectory"
       case disableCorsRestrictions = "general.disableCorsRestrictions"
-      case mainWindowHotKey = "general.mainWindowHotKey"
     }
   }
 
@@ -95,20 +72,6 @@ enum AppRuntimeConfig {
   static var autoCharacterPairs: Bool {
     // Enable auto character pairs by default
     currentDefinition?.autoCharacterPairs ?? true
-  }
-
-  static var autoSaveWhenIdle: Bool {
-    if closeAlwaysConfirmsChanges == true {
-      // If changes require confirmation, they are not saved periodically
-      return false
-    }
-
-    return currentDefinition?.autoSaveWhenIdle ?? false
-  }
-
-  static var closeAlwaysConfirmsChanges: Bool? {
-    // Changes are saved automatically by default
-    currentDefinition?.closeAlwaysConfirmsChanges
   }
 
   static var indentBehavior: EditorIndentBehavior {
@@ -158,19 +121,6 @@ enum AppRuntimeConfig {
     currentDefinition?.visualEffectType ?? .glass
   }
 
-  static var updateBehavior: Definition.UpdateBehavior {
-    guard currentDefinition?.checksForUpdates ?? true else {
-      return .never
-    }
-
-    return currentDefinition?.updateBehavior ?? .quiet
-  }
-
-  static var defaultOpenDirectory: String? {
-    // Unspecified by default
-    currentDefinition?.defaultOpenDirectory
-  }
-
   static var defaultSaveDirectory: String? {
     // Unspecified by default
     currentDefinition?.defaultSaveDirectory
@@ -179,11 +129,6 @@ enum AppRuntimeConfig {
   static var disableCorsRestrictions: Bool {
     // Enforce CORS restrictions by default
     currentDefinition?.disableCorsRestrictions ?? false
-  }
-
-  static var mainWindowHotKey: Definition.HotKey? {
-    // Shift-Command-Option-M by default
-    currentDefinition?.mainWindowHotKey
   }
 
   static var defaultContents: String {
@@ -220,8 +165,6 @@ private extension AppRuntimeConfig {
 
   static let defaultDefinition = Definition(
     autoCharacterPairs: true,
-    autoSaveWhenIdle: false,
-    closeAlwaysConfirmsChanges: nil,
     indentBehavior: .never,
     writingToolsBehavior: nil, // [macOS 15] Complete mode still has lots of bugs
     headerFontSizeDiffs: nil,
@@ -232,12 +175,8 @@ private extension AppRuntimeConfig {
     customToolbarItems: [],
     useClassicInterface: nil,
     visualEffectType: nil,
-    updateBehavior: .quiet,
-    checksForUpdates: nil,
-    defaultOpenDirectory: nil,
     defaultSaveDirectory: nil,
-    disableCorsRestrictions: nil,
-    mainWindowHotKey: .init(key: "M", modifiers: ["Shift", "Command", "Option"])
+    disableCorsRestrictions: nil
   )
 
   static let currentDefinition: Definition? = {
