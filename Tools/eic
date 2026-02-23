@@ -123,9 +123,17 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# Create a temp file with .md extension so macOS document system recognizes it
+mktempmd() {
+  local f
+  f="$(mktemp /tmp/eic.XXXXXX)"
+  mv "$f" "$f.md"
+  echo "$f.md"
+}
+
 if $STDIN_PIPED && [ -n "$ORIGINAL" ] && ! $NO_SAVE; then
   # File + stdin (no --no-save): temp file = file content + stdin
-  TEMP_FILE="$(mktemp /tmp/eic.XXXXXX)"
+  TEMP_FILE="$(mktempmd)"
   if [ -f "$ORIGINAL" ]; then
     cat "$ORIGINAL" > "$TEMP_FILE"
   fi
@@ -134,13 +142,13 @@ if $STDIN_PIPED && [ -n "$ORIGINAL" ] && ! $NO_SAVE; then
 
 elif $STDIN_PIPED; then
   # Stdin only (or stdin + --no-save): temp file from stdin
-  TEMP_FILE="$(mktemp /tmp/eic.XXXXXX)"
+  TEMP_FILE="$(mktempmd)"
   cat > "$TEMP_FILE"
   EDIT_PATH="$TEMP_FILE"
 
 elif $NO_SAVE && [ -n "$ORIGINAL" ]; then
   # File + --no-save: copy to temp
-  TEMP_FILE="$(mktemp /tmp/eic.XXXXXX)"
+  TEMP_FILE="$(mktempmd)"
   if [ -f "$ORIGINAL" ]; then
     cp "$ORIGINAL" "$TEMP_FILE"
   fi
