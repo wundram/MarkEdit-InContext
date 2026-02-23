@@ -8,6 +8,13 @@ set -euo pipefail
 
 APP_NAME="MarkEdit InContext"
 
+# Resolve the app path: prefer /Applications, fall back to name-based lookup
+if [ -d "/Applications/$APP_NAME.app" ]; then
+  APP_PATH="/Applications/$APP_NAME.app"
+else
+  APP_PATH="$APP_NAME"
+fi
+
 usage() {
   cat >&2 <<'EOF'
 Usage: eic [options] [file]
@@ -75,7 +82,7 @@ done
 # --- Settings mode ---
 
 if $SETTINGS; then
-  open -a "$APP_NAME" --args --settings
+  open -a "$APP_PATH" --args --settings
   exit 0
 fi
 
@@ -190,12 +197,12 @@ if [ ${#CONTEXT_PARTS[@]} -gt 0 ]; then
 fi
 
 if $DETACH; then
-  open -a "$APP_NAME" "$EDIT_PATH" --args "${APP_ARGS[@]+"${APP_ARGS[@]}"}"
+  open -a "$APP_PATH" "$EDIT_PATH" --args "${APP_ARGS[@]+"${APP_ARGS[@]}"}"
   exit 0
 fi
 
 # Blocking: -n for new instance, -W to wait
-open -n -W -a "$APP_NAME" "$EDIT_PATH" --args "${APP_ARGS[@]+"${APP_ARGS[@]}"}"
+open -n -W -a "$APP_PATH" "$EDIT_PATH" --args "${APP_ARGS[@]+"${APP_ARGS[@]}"}"
 
 # --- Post-edit: detect save via mtime ---
 
