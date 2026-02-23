@@ -12,19 +12,28 @@ import MarkEditKit
 final class Application: NSApplication {
   /// File path passed via command line arguments
   static var launchFilePath: String?
+  /// Whether the app was launched with --settings to show preferences only
+  static var launchIntoSettings = false
 
   var currentEditor: EditorViewController? {
     keyWindow?.contentViewController as? EditorViewController
   }
 
   static func main() {
-    // Parse command line arguments for file path before anything else.
-    // Filter out args that start with "-" (Xcode/system args) and the executable path.
-    let args = CommandLine.arguments.dropFirst().filter { !$0.hasPrefix("-") }
-    if let filePath = args.first {
-      // Resolve to absolute path
-      let url = URL(fileURLWithPath: filePath)
-      launchFilePath = url.standardizedFileURL.path
+    // Parse command line arguments before anything else.
+    let args = Array(CommandLine.arguments.dropFirst())
+
+    // Check for --settings flag first
+    if args.contains("--settings") {
+      launchIntoSettings = true
+    } else {
+      // Filter out args that start with "-" (Xcode/system args)
+      let fileArgs = args.filter { !$0.hasPrefix("-") }
+      if let filePath = fileArgs.first {
+        // Resolve to absolute path
+        let url = URL(fileURLWithPath: filePath)
+        launchFilePath = url.standardizedFileURL.path
+      }
     }
 
     NSObject.swizzleAccessibilityBundlesOnce

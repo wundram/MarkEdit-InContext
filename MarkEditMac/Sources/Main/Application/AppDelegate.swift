@@ -61,13 +61,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
       EditorReusePool.shared.warmUp()
     }
 
-    // MarkEdit Modal: open the file specified on the command line
-    if let filePath = Application.launchFilePath {
+    // MarkEdit Modal: open settings or file from command line
+    if Application.launchIntoSettings {
+      showPreferences(nil)
+    } else if let filePath = Application.launchFilePath {
       openLaunchFile(path: filePath)
     }
 
     // Install uncaught exception handler
     AppExceptionCatcher.install()
+  }
+
+  func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+    // In settings-only mode, quit when the settings window is closed
+    Application.launchIntoSettings
   }
 
   func applicationShouldTerminate(_ application: NSApplication) -> NSApplication.TerminateReply {

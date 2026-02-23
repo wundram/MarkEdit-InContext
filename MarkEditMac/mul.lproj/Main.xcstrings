@@ -122,25 +122,25 @@
       }
     },
     "1Xt-HY-uBw.title" : {
-      "comment" : "Class = \"NSMenuItem\"; title = \"MarkEdit\"; ObjectID = \"1Xt-HY-uBw\";",
+      "comment" : "Class = \"NSMenuItem\"; title = \"MarkEdit Modal\"; ObjectID = \"1Xt-HY-uBw\";",
       "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "MarkEdit"
+            "value" : "MarkEdit Modal"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "MarkEdit"
+            "value" : "MarkEdit Modal"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "MarkEdit"
+            "value" : "MarkEdit Modal"
           }
         }
       }
@@ -290,25 +290,25 @@
       }
     },
     "4sb-4s-VLi.title" : {
-      "comment" : "Class = \"NSMenuItem\"; title = \"Quit MarkEdit\"; ObjectID = \"4sb-4s-VLi\";",
+      "comment" : "Class = \"NSMenuItem\"; title = \"Quit MarkEdit Modal\"; ObjectID = \"4sb-4s-VLi\";",
       "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Quit MarkEdit"
+            "value" : "Quit MarkEdit Modal"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "退出 MarkEdit"
+            "value" : "退出 MarkEdit Modal"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "結束 MarkEdit"
+            "value" : "結束 MarkEdit Modal"
           }
         }
       }
@@ -338,25 +338,25 @@
       }
     },
     "5kV-Vb-QxS.title" : {
-      "comment" : "Class = \"NSMenuItem\"; title = \"About MarkEdit\"; ObjectID = \"5kV-Vb-QxS\";",
+      "comment" : "Class = \"NSMenuItem\"; title = \"About MarkEdit Modal\"; ObjectID = \"5kV-Vb-QxS\";",
       "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "About MarkEdit"
+            "value" : "About MarkEdit Modal"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "关于 MarkEdit"
+            "value" : "关于 MarkEdit Modal"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "關於 MarkEdit"
+            "value" : "關於 MarkEdit Modal"
           }
         }
       }
@@ -1538,25 +1538,25 @@
       }
     },
     "FKE-Sm-Kum.title" : {
-      "comment" : "Class = \"NSMenuItem\"; title = \"MarkEdit Help\"; ObjectID = \"FKE-Sm-Kum\";",
+      "comment" : "Class = \"NSMenuItem\"; title = \"MarkEdit Modal Help\"; ObjectID = \"FKE-Sm-Kum\";",
       "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "MarkEdit Help"
+            "value" : "MarkEdit Modal Help"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "MarkEdit 帮助"
+            "value" : "MarkEdit Modal 帮助"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "MarkEdit 輔助說明"
+            "value" : "MarkEdit Modal 輔助說明"
           }
         }
       }
@@ -2631,25 +2631,25 @@
       }
     },
     "Olw-nP-bQN.title" : {
-      "comment" : "Class = \"NSMenuItem\"; title = \"Hide MarkEdit\"; ObjectID = \"Olw-nP-bQN\";",
+      "comment" : "Class = \"NSMenuItem\"; title = \"Hide MarkEdit Modal\"; ObjectID = \"Olw-nP-bQN\";",
       "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Hide MarkEdit"
+            "value" : "Hide MarkEdit Modal"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "隐藏 MarkEdit"
+            "value" : "隐藏 MarkEdit Modal"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "隱藏 MarkEdit"
+            "value" : "隱藏 MarkEdit Modal"
           }
         }
       }
@@ -3687,25 +3687,25 @@
       }
     },
     "uQy-DD-JDr.title" : {
-      "comment" : "Class = \"NSMenu\"; title = \"MarkEdit\"; ObjectID = \"uQy-DD-JDr\";",
+      "comment" : "Class = \"NSMenu\"; title = \"MarkEdit Modal\"; ObjectID = \"uQy-DD-JDr\";",
       "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "MarkEdit"
+            "value" : "MarkEdit Modal"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "MarkEdit"
+            "value" : "MarkEdit Modal"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "MarkEdit"
+            "value" : "MarkEdit Modal"
           }
         }
       }

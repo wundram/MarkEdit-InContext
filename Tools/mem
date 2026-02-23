@@ -2,8 +2,13 @@
 # mem - MarkEdit Modal CLI launcher
 
 if [ -z "$1" ]; then
-  echo "Usage: mem <file>" >&2
+  echo "Usage: mem <file> | mem --settings" >&2
   exit 1
+fi
+
+if [ "$1" = "--settings" ]; then
+  open -a "MarkEdit Modal" --args --settings
+  exit 0
 fi
 
 # Resolve to absolute path

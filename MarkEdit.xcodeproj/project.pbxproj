@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AA00000200000000000CAFE2 /* mem in Copy CLI Tool */ = {isa = PBXBuildFile; fileRef = AA00000100000000000CAFE1 /* mem */; };
 		84FB00F02C6C4AED00850E94 /* MarkEditWritingTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 84FB00EF2C6C4AED00850E94 /* MarkEditWritingTools.m */; };
 		8701D0A42CC12321006AF8C2 /* FileVersion in Frameworks */ = {isa = PBXBuildFile; productRef = 8701D0A32CC12321006AF8C2 /* FileVersion */; };
 		87067E2729755D5C0052E795 /* EditorStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87067E2629755D5C0052E795 /* EditorStatusView.swift */; };
@@ -126,9 +127,21 @@
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AA00000300000000000CAFE3 /* Copy CLI Tool */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 7;
+			files = (
+				AA00000200000000000CAFE2 /* mem in Copy CLI Tool */,
+			);
+			name = "Copy CLI Tool";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		AA00000100000000000CAFE1 /* mem */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = mem; path = Tools/mem; sourceTree = "<group>"; };
 		84FB00ED2C6C4AED00850E94 /* MarkEditMac-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MarkEditMac-Bridging-Header.h"; sourceTree = "<group>"; };
 		84FB00EE2C6C4AED00850E94 /* MarkEditWritingTools.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MarkEditWritingTools.h; sourceTree = "<group>"; };
 		84FB00EF2C6C4AED00850E94 /* MarkEditWritingTools.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MarkEditWritingTools.m; sourceTree = "<group>"; };
@@ -281,6 +294,7 @@
 				870A51A3294700DE0095C7EB /* Products */,
 				874823CC29B0BD980067EC49 /* Frameworks */,
 				8743B26229593B2000F83DAE /* Build.xcconfig */,
+				AA00000100000000000CAFE1 /* mem */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -545,6 +559,7 @@
 				870A519F294700DE0095C7EB /* Frameworks */,
 				870A51A0294700DE0095C7EB /* Resources */,
 				872924112951525C007156B1 /* Embed Foundation Extensions */,
+				AA00000300000000000CAFE3 /* Copy CLI Tool */,
 			);
 			buildRules = (
 			);
@@ -968,11 +983,11 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MarkEditMac/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = MarkEdit;
+				INFOPLIST_KEY_CFBundleDisplayName = "MarkEdit Modal";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
-				INFOPLIST_KEY_NSPrincipalClass = "$(PRODUCT_NAME).Application";
+				INFOPLIST_KEY_NSPrincipalClass = MarkEdit.Application;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -980,7 +995,8 @@
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(inherited)";
-				PRODUCT_NAME = MarkEdit;
+				PRODUCT_MODULE_NAME = MarkEdit;
+				PRODUCT_NAME = "MarkEdit Modal";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "MarkEditMac/Sources/ObjC/MarkEditMac-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -1005,11 +1021,11 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MarkEditMac/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = MarkEdit;
+				INFOPLIST_KEY_CFBundleDisplayName = "MarkEdit Modal";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
-				INFOPLIST_KEY_NSPrincipalClass = "$(PRODUCT_NAME).Application";
+				INFOPLIST_KEY_NSPrincipalClass = MarkEdit.Application;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -1017,7 +1033,8 @@
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(inherited)";
-				PRODUCT_NAME = MarkEdit;
+				PRODUCT_MODULE_NAME = MarkEdit;
+				PRODUCT_NAME = "MarkEdit Modal";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "MarkEditMac/Sources/ObjC/MarkEditMac-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
@@ -1049,7 +1066,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = FinderExtension/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = MarkEdit;
+				INFOPLIST_KEY_CFBundleDisplayName = "MarkEdit Modal";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1095,7 +1112,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = FinderExtension/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = MarkEdit;
+				INFOPLIST_KEY_CFBundleDisplayName = "MarkEdit Modal";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1128,7 +1145,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PreviewExtension/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = MarkEdit;
+				INFOPLIST_KEY_CFBundleDisplayName = "MarkEdit Modal";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1158,7 +1175,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PreviewExtension/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = MarkEdit;
+				INFOPLIST_KEY_CFBundleDisplayName = "MarkEdit Modal";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
