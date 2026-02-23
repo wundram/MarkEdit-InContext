@@ -1,6 +1,6 @@
 cask "markedit-in-context" do
   version "0.1.0"
-  sha256 "PLACEHOLDER"
+  sha256 "3e310ced65613776278b4f0537f0b0a2319153cca4d03e4ae7e300d3a2ecbc1b"
 
   url "https://github.com/wundram/MarkEdit-InContext/releases/download/v#{version}/MarkEdit-InContext-#{version}.zip"
   name "MarkEdit InContext"
