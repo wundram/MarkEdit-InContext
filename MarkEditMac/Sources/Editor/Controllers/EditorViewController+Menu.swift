@@ -157,6 +157,19 @@ extension EditorViewController {
     document?.isTerminating = true
     NSApplication.shared.terminate(sender)
   }
+
+  @objc func copyAll(_ sender: Any?) {
+    Task { @MainActor in
+      if let text = await editorText {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(text, forType: .string)
+      }
+    }
+  }
+
+  func saveWithoutExit() {
+    document?.saveContent(userInitiated: true)
+  }
 }
 
 // MARK: - Developer

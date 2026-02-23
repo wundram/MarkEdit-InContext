@@ -14,6 +14,32 @@ final class Application: NSApplication {
   static var launchFilePath: String?
   /// Whether the app was launched with --settings to show preferences only
   static var launchIntoSettings = false
+  /// Window title passed via --title command line argument
+  static var launchTitle: String?
+  /// Whether launched in output mode (stdout/no-save context)
+  static var isOutputMode = false
+  /// Whether launched in detached mode (--detach context)
+  static var isDetached = false
+
+  /// Label for the save/exit action based on launch context
+  static var saveActionLabel: String {
+    switch (isOutputMode, isDetached) {
+    case (false, false): return "Save and Exit"
+    case (true, false):  return "Output and Exit"
+    case (false, true):  return "Save"
+    case (true, true):   return "Output"
+    }
+  }
+
+  /// Asset name for the save/exit toolbar icon
+  static var saveActionIcon: String {
+    switch (isOutputMode, isDetached) {
+    case (false, false): return "save-and-exit"
+    case (true, false):  return "output-and-exit"
+    case (false, true):  return "save-detach"
+    case (true, true):   return "output-detach"
+    }
+  }
 
   var currentEditor: EditorViewController? {
     keyWindow?.contentViewController as? EditorViewController
@@ -27,12 +53,33 @@ final class Application: NSApplication {
     if args.contains("--settings") {
       launchIntoSettings = true
     } else {
-      // Filter out args that start with "-" (Xcode/system args)
-      let fileArgs = args.filter { !$0.hasPrefix("-") }
-      if let filePath = fileArgs.first {
-        // Resolve to absolute path
-        let url = URL(fileURLWithPath: filePath)
-        launchFilePath = url.standardizedFileURL.path
+      // Parse --title <value>
+      if let titleIndex = args.firstIndex(of: "--title"),
+         titleIndex + 1 < args.count {
+        launchTitle = args[titleIndex + 1]
+      }
+
+      // Parse --context <value> (comma-separated: stdout, detach)
+      if let ctxIndex = args.firstIndex(of: "--context"),
+         ctxIndex + 1 < args.count {
+        let ctx = args[ctxIndex + 1].split(separator: ",").map(String.init)
+        isOutputMode = ctx.contains("stdout")
+        isDetached = ctx.contains("detach")
+      }
+
+      // Filter out known flags and their values to find the file arg
+      var i = 0
+      while i < args.count {
+        if args[i] == "--title" || args[i] == "--context" {
+          i += 2 // skip flag + value
+        } else if args[i].hasPrefix("-") {
+          i += 1 // skip unknown flags
+        } else {
+          // Resolve to absolute path
+          let url = URL(fileURLWithPath: args[i])
+          launchFilePath = url.standardizedFileURL.path
+          break
+        }
       }
     }
 

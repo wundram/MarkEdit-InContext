@@ -29,6 +29,7 @@ final class EditorViewController: NSViewController {
 
   weak var presentedMenu: NSMenu?
   weak var presentedPopover: NSPopover?
+  weak var saveToolbarItem: NSToolbarItem?
 
   var editorText: String? {
     get async {

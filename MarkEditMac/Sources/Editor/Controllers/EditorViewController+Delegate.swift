@@ -127,7 +127,7 @@ extension EditorViewController: EditorModuleCoreDelegate {
       return
     }
 
-    // MarkEdit Modal: no auto-save on idle, just sync content
+    // MarkEdit InContext: no auto-save on idle, just sync content
     document?.updateContent()
   }
 

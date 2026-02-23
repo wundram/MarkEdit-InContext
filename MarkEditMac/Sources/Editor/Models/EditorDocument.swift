@@ -57,7 +57,7 @@ final class EditorDocument: NSDocument {
   }
 
   var shouldSaveWhenIdle: Bool {
-    false // MarkEdit Modal: no auto-save
+    false // MarkEdit InContext: no auto-save
   }
 
   private var textBundle: TextBundleWrapper?
@@ -74,6 +74,11 @@ final class EditorDocument: NSDocument {
    File name from external apps, such as Shortcuts or URL schemes.
    */
   private var externalFilename: String?
+
+  /**
+   Title derived from the first `# ` heading in file content.
+   */
+  private var titleFromContent: String?
 
   override func makeWindowControllers() {
     let storyboard = NSStoryboard(name: NSStoryboard.Name("Main"), bundle: nil)
@@ -193,6 +198,16 @@ extension EditorDocument {
 
   override var displayName: String? {
     get {
+      // --title flag takes highest priority
+      if let title = Application.launchTitle {
+        return title
+      }
+
+      // Title from first-line # heading
+      if let title = titleFromContent {
+        return title
+      }
+
       // Default file name for new drafts, pre-filled in the save panel
       if fileURL == nil, let newFileName = suggestedFilename ?? externalFilename {
         return newFileName
@@ -210,7 +225,7 @@ extension EditorDocument {
   }
 
   override func canClose(withDelegate delegate: Any, shouldClose shouldCloseSelector: Selector?, contextInfo: UnsafeMutableRawPointer?) {
-    // MarkEdit Modal: always allow close without save dialog (discard-and-exit)
+    // MarkEdit InContext: always allow close without save dialog (discard-and-exit)
     if let shouldCloseSelector {
       let delegateObject = delegate as AnyObject
       let method = unsafeBitCast(
@@ -288,24 +303,41 @@ extension EditorDocument {
         return encoding.decode(data: data, guessEncoding: true)
       }()
 
+      // Extract title from first-line heading (# Title)
+      let extractedTitle: String? = {
+        guard let firstLine = newValue.components(separatedBy: .newlines).first,
+              firstLine.hasPrefix("# ") else {
+          return nil
+        }
+        let title = String(firstLine.dropFirst(2)).trimmingCharacters(in: .whitespaces)
+        return title.isEmpty ? nil : title
+      }()
+
       DispatchQueue.main.async {
         self.fileData = data
         self.stringValue = newValue
+        self.titleFromContent = extractedTitle
         self.hostViewController?.representedObject = self
       }
     }
   }
 
-  // MarkEdit Modal: save-and-quit behavior.
-  // We sync content from the WebView, write to disk, then terminate.
+  // MarkEdit InContext: save behavior depends on launch context and Option key.
+  // Option key held → always save without exiting (detach override).
+  // Detached mode → save without exiting.
+  // Otherwise → save and terminate.
   override func save(_ sender: Any?) {
+    let optionHeld = NSEvent.modifierFlags.contains(.option)
+    let shouldExit = !Application.isDetached && !optionHeld
     saveContent(sender: sender, userInitiated: true) {
-      NSApp.terminate(nil)
+      if shouldExit {
+        NSApp.terminate(nil)
+      }
     }
   }
 
   override func autosave(withImplicitCancellability implicitlyCancellable: Bool) async throws {
-    // MarkEdit Modal: autosave is disabled (explicit save only)
+    // MarkEdit InContext: autosave is disabled (explicit save only)
   }
 
   /// Save a Copy: present NSSavePanel, write to chosen path, keep editing original

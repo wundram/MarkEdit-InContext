@@ -82,7 +82,7 @@ final class EditorWindowController: NSWindowController, NSWindowDelegate {
 
   func windowWillClose(_ notification: Notification) {
     editorViewController?.clearEditor()
-    // MarkEdit Modal: closing the window = quit app
+    // MarkEdit InContext: closing the window = quit app
     NSApp.terminate(nil)
   }
 }

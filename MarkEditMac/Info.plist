@@ -99,10 +99,10 @@
 			<key>CFBundleURLIconFile</key>
 			<string></string>
 			<key>CFBundleURLName</key>
-			<string>mem</string>
+			<string>eic</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>mem</string>
+				<string>eic</string>
 			</array>
 		</dict>
 	</array>

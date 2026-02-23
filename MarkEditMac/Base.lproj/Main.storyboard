@@ -11,11 +11,11 @@
                 <application id="hnw-xV-0zn" sceneMemberID="viewController">
                     <menu key="mainMenu" title="Main Menu" systemMenu="main" id="AYu-sK-qS6">
                         <items>
-                            <menuItem title="MarkEdit Modal" id="1Xt-HY-uBw" userLabel="MarkEdit Modal">
+                            <menuItem title="MarkEdit InContext" id="1Xt-HY-uBw" userLabel="MarkEdit InContext">
                                 <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="MarkEdit Modal" systemMenu="apple" id="uQy-DD-JDr">
+                                <menu key="submenu" title="MarkEdit InContext" systemMenu="apple" id="uQy-DD-JDr">
                                     <items>
-                                        <menuItem title="About MarkEdit Modal" id="5kV-Vb-QxS">
+                                        <menuItem title="About MarkEdit InContext" id="5kV-Vb-QxS">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="orderFrontStandardAboutPanel:" target="Ady-hI-5gd" id="Exp-CZ-Vem"/>
@@ -59,7 +59,7 @@
                                             </menu>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="4je-JR-u6R"/>
-                                        <menuItem title="Hide MarkEdit Modal" keyEquivalent="h" id="Olw-nP-bQN">
+                                        <menuItem title="Hide MarkEdit InContext" keyEquivalent="h" id="Olw-nP-bQN">
                                             <connections>
                                                 <action selector="hide:" target="Ady-hI-5gd" id="PnN-Uc-m68"/>
                                             </connections>
@@ -77,7 +77,7 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="kCx-OE-vgT"/>
-                                        <menuItem title="Quit MarkEdit Modal" keyEquivalent="q" id="4sb-4s-VLi">
+                                        <menuItem title="Discard and Exit" keyEquivalent="q" id="4sb-4s-VLi">
                                             <connections>
                                                 <action selector="terminate:" target="Ady-hI-5gd" id="Te7-pn-YzF"/>
                                             </connections>
@@ -723,7 +723,7 @@ Gw
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Help" systemMenu="help" id="F2S-fz-NVQ">
                                     <items>
-                                        <menuItem title="MarkEdit Modal Help" keyEquivalent="?" id="FKE-Sm-Kum">
+                                        <menuItem title="MarkEdit InContext Help" keyEquivalent="?" id="FKE-Sm-Kum">
                                             <connections>
                                                 <action selector="showHelp:" target="Voe-Tx-rLC" id="ba9-aC-ghc"/>
                                             </connections>
@@ -793,6 +793,8 @@ Gw
                         <outlet property="mainWindowMenu" destination="Td7-aD-5lo" id="9j1-c6-lEO"/>
                         <outlet property="textFormatMenu" destination="yy7-cF-JbT" id="FfG-yi-NE6"/>
                         <outlet property="windowFloatingItem" destination="0C5-FE-fvI" id="hM7-gl-t1f"/>
+                        <outlet property="saveMenuItem" destination="pxx-59-PXV" id="sav-mn-001"/>
+                        <outlet property="quitMenuItem" destination="4sb-4s-VLi" id="qut-mn-001"/>
                     </connections>
                 </customObject>
                 <customObject id="YLy-65-1bz" customClass="NSFontManager"/>

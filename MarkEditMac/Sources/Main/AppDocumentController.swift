@@ -17,7 +17,7 @@ final class AppDocumentController: NSDocumentController {
   static var suggestedTextEncoding: EditorTextEncoding?
   static var suggestedFilename: String?
 
-  // MarkEdit Modal: disable recent documents tracking entirely
+  // MarkEdit InContext: disable recent documents tracking entirely
   override var maximumRecentDocumentCount: Int { 0 }
 
   override func noteNewRecentDocument(_ document: NSDocument) {
@@ -38,12 +38,12 @@ final class AppDocumentController: NSDocumentController {
     clearRecentDocuments(nil)
   }
 
-  // MarkEdit Modal: prevent creating new documents
+  // MarkEdit InContext: prevent creating new documents
   override func newDocument(_ sender: Any?) {
     // No-op: single-file editor
   }
 
-  // MarkEdit Modal: prevent opening additional documents via menu
+  // MarkEdit InContext: prevent opening additional documents via menu
   override func openDocument(_ sender: Any?) {
     // No-op: single-file editor
   }

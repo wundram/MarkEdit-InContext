@@ -77,6 +77,7 @@ extension NSToolbarItem {
     case .insertLink: return "⌘ K"
     case .insertImage: return "⌃ ⌘ K"
     case .statistics: return "⇧ ⌘ I"
+    case .saveAndExit: return "⌘ S"
     default: return nil
     }
   }
@@ -100,6 +101,8 @@ extension NSToolbarItem.Identifier {
   static let shareDocument = newItem("shareDocument")
   static let copyPandocCommand = newItem("copyPandocCommand")
   static let writingTools = newItem("writingTools")
+  static let copyAll = newItem("copyAll")
+  static let saveAndExit = newItem("saveAndExit")
 
   static var defaultItems: [NSToolbarItem.Identifier] {
     [
@@ -108,6 +111,9 @@ extension NSToolbarItem.Identifier {
       .toggleBold,
       .toggleItalic,
       .toggleList,
+      .flexibleSpace,
+      .copyAll,
+      .saveAndExit,
     ]
   }
 
@@ -129,6 +135,8 @@ extension NSToolbarItem.Identifier {
       .statistics,
       .shareDocument,
       .copyPandocCommand,
+      .copyAll,
+      .saveAndExit,
     ]
     + {
       if #available(macOS 15.1, *) {
@@ -170,6 +178,8 @@ private extension NSToolbarItem.Identifier {
     case .shareDocument: return Localized.Toolbar.shareDocument
     case .copyPandocCommand: return Localized.Toolbar.copyPandocCommand
     case .writingTools: return Localized.WritingTools.title
+    case .copyAll: return Localized.Toolbar.copyAll
+    case .saveAndExit: return Application.saveActionLabel
     default: fatalError("Unexpected toolbar item identifier: \(self)")
     }
   }
@@ -193,6 +203,8 @@ private extension NSToolbarItem.Identifier {
     case .shareDocument: return Icons.squareAndArrowUp
     case .copyPandocCommand: return Icons.terminal
     case .writingTools: return Icons.wandAndSparkles
+    case .copyAll: return "" // uses custom asset image
+    case .saveAndExit: return "" // uses custom asset image
     default: fatalError("Unexpected toolbar item identifier: \(self)")
     }
   }

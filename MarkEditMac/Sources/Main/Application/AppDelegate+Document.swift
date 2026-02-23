@@ -19,12 +19,12 @@ extension AppDelegate {
   }
 
   func applicationShouldOpenUntitledFile(_ sender: NSApplication) -> Bool {
-    // MarkEdit Modal: never open untitled files automatically
+    // MarkEdit InContext: never open untitled files automatically
     false
   }
 
   func applicationDockMenu(_ sender: NSApplication) -> NSMenu? {
-    // MarkEdit Modal: no dock menu (single-file editor)
+    // MarkEdit InContext: no dock menu (single-file editor)
     nil
   }
 
@@ -52,7 +52,7 @@ extension AppDelegate {
   }
 
   func createNewFile(queryDict: [String: String]?) {
-    // MarkEdit Modal: URL scheme support for opening files
+    // MarkEdit InContext: URL scheme support for opening files
     if let filePath = queryDict?["path"] ?? queryDict?["filename"] {
       openLaunchFile(path: filePath)
     }
@@ -66,6 +66,6 @@ extension AppDelegate {
 
   // Stub for compatibility with menu actions until Phase 4 removes the menu items
   func createNewFile(fileName: String? = nil, initialContent: String? = nil, isIntent: Bool = false) {
-    // No-op in MarkEdit Modal
+    // No-op in MarkEdit InContext
   }
 }

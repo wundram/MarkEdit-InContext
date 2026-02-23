@@ -64,6 +64,7 @@ enum Localized {
     static let statistics = String(localized: "Statistics", comment: "Toolbar item to show statistics")
     static let shareDocument = String(localized: "Share this document", comment: "Toolbar item to share the document")
     static let copyPandocCommand = String(localized: "Copy Pandoc Command", comment: "Toolbar item to copy pandoc command")
+    static let copyAll = String(localized: "Copy All", comment: "Toolbar item to copy all text")
   }
 
   enum Search {

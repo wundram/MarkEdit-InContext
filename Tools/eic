@@ -1,0 +1,217 @@
+#!/bin/bash
+# eic - MarkEdit InContext CLI launcher
+#
+# Edit In Context: a blocking, pipe-aware CLI for MarkEdit InContext.
+# Supports stdin/stdout piping, --title, --no-save, --detach, --settings.
+
+set -euo pipefail
+
+APP_NAME="MarkEdit InContext"
+
+usage() {
+  cat >&2 <<'EOF'
+Usage: eic [options] [file]
+
+Edit a file in MarkEdit InContext. Blocks until the editor is closed.
+
+Options:
+  --settings      Open the settings panel
+  --detach        Open and return immediately (don't block)
+  --no-save       Edit a copy; on save, output to stdout (original unchanged)
+  --title <text>  Set the window title
+
+Piping:
+  echo "text" | eic              Stdin → editor → stdout on save
+  echo "text" | eic file.md      Append stdin to file → editor → save to file
+  eic file.md | next             Edit file → stdout on save → next command
+  eic --no-save file.md          Edit copy → stdout on save, original unchanged
+
+Git:
+  GIT_EDITOR=eic git commit      Blocks until save or discard
+
+Without arguments, prints this help.
+EOF
+  exit 1
+}
+
+# --- Parse arguments ---
+
+DETACH=false
+NO_SAVE=false
+SETTINGS=false
+TITLE=""
+FILE=""
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --settings)
+      SETTINGS=true
+      shift
+      ;;
+    --detach)
+      DETACH=true
+      shift
+      ;;
+    --no-save)
+      NO_SAVE=true
+      shift
+      ;;
+    --title)
+      [ $# -ge 2 ] || { echo "eic: --title requires a value" >&2; exit 1; }
+      TITLE="$2"
+      shift 2
+      ;;
+    -*)
+      echo "eic: unknown option: $1" >&2
+      exit 1
+      ;;
+    *)
+      FILE="$1"
+      shift
+      ;;
+  esac
+done
+
+# --- Settings mode ---
+
+if $SETTINGS; then
+  open -a "$APP_NAME" --args --settings
+  exit 0
+fi
+
+# --- Detect pipes ---
+
+STDIN_PIPED=false
+STDOUT_PIPED=false
+
+[ ! -t 0 ] && STDIN_PIPED=true
+[ ! -t 1 ] && STDOUT_PIPED=true
+
+# --- Need at least a file or stdin ---
+
+if [ -z "$FILE" ] && ! $STDIN_PIPED; then
+  usage
+fi
+
+# --- Resolve file to absolute path ---
+
+ORIGINAL=""
+if [ -n "$FILE" ]; then
+  DIR="$(cd "$(dirname "$FILE")" 2>/dev/null && pwd)"
+  ORIGINAL="$DIR/$(basename "$FILE")"
+fi
+
+# --- Git auto-title ---
+
+if [ -z "$TITLE" ] && [ -n "$ORIGINAL" ]; then
+  case "$ORIGINAL" in
+    */.git/COMMIT_EDITMSG)     TITLE="Git Commit" ;;
+    */.git/rebase-merge/*)     TITLE="Git Rebase" ;;
+    */.git/MERGE_MSG)          TITLE="Git Merge" ;;
+    */.git/TAG_EDITMSG)        TITLE="Git Tag" ;;
+    */.git/SQUASH_MSG)         TITLE="Git Squash" ;;
+  esac
+fi
+
+# --- Build edit target ---
+
+TEMP_FILE=""
+EDIT_PATH=""
+
+cleanup() {
+  [ -n "$TEMP_FILE" ] && rm -f "$TEMP_FILE"
+}
+trap cleanup EXIT
+
+if $STDIN_PIPED && [ -n "$ORIGINAL" ] && ! $NO_SAVE; then
+  # File + stdin (no --no-save): temp file = file content + stdin
+  TEMP_FILE="$(mktemp /tmp/eic.XXXXXX)"
+  if [ -f "$ORIGINAL" ]; then
+    cat "$ORIGINAL" > "$TEMP_FILE"
+  fi
+  cat >> "$TEMP_FILE"
+  EDIT_PATH="$TEMP_FILE"
+
+elif $STDIN_PIPED; then
+  # Stdin only (or stdin + --no-save): temp file from stdin
+  TEMP_FILE="$(mktemp /tmp/eic.XXXXXX)"
+  cat > "$TEMP_FILE"
+  EDIT_PATH="$TEMP_FILE"
+
+elif $NO_SAVE && [ -n "$ORIGINAL" ]; then
+  # File + --no-save: copy to temp
+  TEMP_FILE="$(mktemp /tmp/eic.XXXXXX)"
+  if [ -f "$ORIGINAL" ]; then
+    cp "$ORIGINAL" "$TEMP_FILE"
+  fi
+  EDIT_PATH="$TEMP_FILE"
+
+else
+  # Plain file edit
+  EDIT_PATH="$ORIGINAL"
+  # Touch the file so it exists for the app to open
+  [ -f "$EDIT_PATH" ] || touch "$EDIT_PATH"
+fi
+
+# --- Record mtime before editing ---
+
+MTIME_BEFORE=""
+if [ -f "$EDIT_PATH" ]; then
+  MTIME_BEFORE="$(stat -f %m "$EDIT_PATH" 2>/dev/null || echo "")"
+fi
+
+# --- Build launch command ---
+
+APP_ARGS=()
+if [ -n "$TITLE" ]; then
+  APP_ARGS+=(--title "$TITLE")
+fi
+
+# Build context string for the app
+CONTEXT_PARTS=()
+if $STDOUT_PIPED || $NO_SAVE; then
+  CONTEXT_PARTS+=("stdout")
+fi
+if $DETACH; then
+  CONTEXT_PARTS+=("detach")
+fi
+
+if [ ${#CONTEXT_PARTS[@]} -gt 0 ]; then
+  CONTEXT_STR=$(IFS=,; echo "${CONTEXT_PARTS[*]}")
+  APP_ARGS+=(--context "$CONTEXT_STR")
+fi
+
+if $DETACH; then
+  open -a "$APP_NAME" "$EDIT_PATH" --args "${APP_ARGS[@]+"${APP_ARGS[@]}"}"
+  exit 0
+fi
+
+# Blocking: -n for new instance, -W to wait
+open -n -W -a "$APP_NAME" "$EDIT_PATH" --args "${APP_ARGS[@]+"${APP_ARGS[@]}"}"
+
+# --- Post-edit: detect save via mtime ---
+
+MTIME_AFTER=""
+if [ -f "$EDIT_PATH" ]; then
+  MTIME_AFTER="$(stat -f %m "$EDIT_PATH" 2>/dev/null || echo "")"
+fi
+
+SAVED=false
+if [ -n "$MTIME_BEFORE" ] && [ -n "$MTIME_AFTER" ] && [ "$MTIME_BEFORE" != "$MTIME_AFTER" ]; then
+  SAVED=true
+elif [ -z "$MTIME_BEFORE" ] && [ -f "$EDIT_PATH" ]; then
+  # File was newly created
+  SAVED=true
+fi
+
+if $SAVED; then
+  # If we used a temp file and have an original (and not --no-save), copy back
+  if [ -n "$TEMP_FILE" ] && [ -n "$ORIGINAL" ] && ! $NO_SAVE; then
+    cp "$TEMP_FILE" "$ORIGINAL"
+  fi
+
+  # Output to stdout if piped or --no-save
+  if $STDOUT_PIPED || $NO_SAVE; then
+    cat "$EDIT_PATH"
+  fi
+fi

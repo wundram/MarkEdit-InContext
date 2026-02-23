@@ -38,6 +38,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
   @IBOutlet weak var formatMathItem: NSMenuItem?
   @IBOutlet weak var formatMathBlockItem: NSMenuItem?
   @IBOutlet weak var windowFloatingItem: NSMenuItem?
+  @IBOutlet weak var saveMenuItem: NSMenuItem?
+  @IBOutlet weak var quitMenuItem: NSMenuItem?
 
   private var appearanceObservation: NSKeyValueObservation?
   private var settingsWindowController: NSWindowController?
@@ -61,7 +63,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
       EditorReusePool.shared.warmUp()
     }
 
-    // MarkEdit Modal: open settings or file from command line
+    // Update menu item titles based on launch context
+    saveMenuItem?.title = Application.saveActionLabel
+    quitMenuItem?.title = "Discard and Exit"
+
+    // MarkEdit InContext: open settings or file from command line
     if Application.launchIntoSettings {
       showPreferences(nil)
     } else if let filePath = Application.launchFilePath {
@@ -78,7 +84,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
   }
 
   func applicationShouldTerminate(_ application: NSApplication) -> NSApplication.TerminateReply {
-    // MarkEdit Modal: quit = discard, always terminate immediately
+    // MarkEdit InContext: quit = discard, always terminate immediately
     return .terminateNow
   }
 
@@ -100,10 +106,10 @@ extension AppDelegate {
       let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
       switch components?.host {
       case "new-file":
-        // mem://new-file?filename=Untitled&initial-content=Hello
+        // eic://new-file?filename=Untitled&initial-content=Hello
         createNewFile(queryDict: components?.queryDict)
       case "open":
-        // mem://open or mem://open?path=Untitled.md
+        // eic://open or eic://open?path=Untitled.md
         openFile(queryDict: components?.queryDict)
       default:
         break

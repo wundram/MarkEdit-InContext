@@ -4,21 +4,25 @@
   <img src="./Icon.png" width="128">
 </picture>
 
-# MarkEdit Modal
+# MarkEdit InContext
 
 [![macOS 15+](https://img.shields.io/badge/macOS-15.0+-007bff)](https://github.com/nicwundram/MarkEdit-modal)
 
-A CLI-launched modal Markdown editor for macOS, forked from [MarkEdit](https://github.com/MarkEdit-app/MarkEdit).
+A CLI-launched, in-context Markdown editor for macOS, forked from [MarkEdit](https://github.com/MarkEdit-app/MarkEdit).
+
+Edit text in context — in the middle of a pipe chain, as a git editor, or as a quick-edit tool. The CLI command `eic` (Edit In Context) opens a file, blocks the terminal until you save or discard, and optionally pipes content through stdin/stdout.
 
 ## How it differs from MarkEdit
 
-MarkEdit Modal strips MarkEdit down to a single-purpose tool: edit one Markdown file at a time, launched from the terminal.
+MarkEdit InContext strips MarkEdit down to a single-purpose tool: edit one file at a time, launched from the terminal.
 
-- **Single-file, CLI-launched** — `mem <file>` opens the file; closing the window quits the app
+- **Single-file, CLI-launched** — `eic <file>` opens the file; closing the window quits the app
+- **Blocking by default** — the terminal waits until you save (`Cmd+S`) or discard (`Cmd+Q`)
+- **Pipe-aware** — reads from stdin, writes to stdout, works in pipe chains
+- **Git-ready** — `GIT_EDITOR=eic` works out of the box with auto-detected titles
 - **Three operations only** — Save & Exit (`Cmd+S`), Discard & Exit (`Cmd+Q`), Save a Copy (`Cmd+Shift+S`)
 - **No autosave** — your file is never written to disk until you explicitly save
 - **No tabs, no recent documents, no Dock menu**
-- **No updater, Shortcuts, or AppleScript**
 - **Same editor core** — CodeMirror 6, themes, syntax highlighting, completions, and all editor settings
 
 ## Installation
@@ -26,42 +30,101 @@ MarkEdit Modal strips MarkEdit down to a single-purpose tool: edit one Markdown 
 ### Homebrew (recommended)
 
 ```sh
-brew install --no-quarantine nicwundram/tap/markedit-modal
+brew install --no-quarantine nicwundram/tap/markedit-in-context
 ```
 
 The `--no-quarantine` flag skips Gatekeeper since the app is ad-hoc signed (see [Gatekeeper note](#gatekeeper) below).
 
 ### Manual
 
-1. Download `MarkEdit-Modal-<version>.zip` from the [latest release](https://github.com/nicwundram/MarkEdit-modal/releases/latest)
-2. Unzip and move `MarkEdit Modal.app` to `/Applications`
-3. Copy `Tools/mem` to somewhere on your `$PATH` (e.g. `/usr/local/bin/mem`)
+1. Download `MarkEdit-InContext-<version>.zip` from the [latest release](https://github.com/nicwundram/MarkEdit-modal/releases/latest)
+2. Unzip and move `MarkEdit InContext.app` to `/Applications`
+3. Copy `Tools/eic` to somewhere on your `$PATH` (e.g. `/usr/local/bin/eic`)
 4. Allow the app in **System Settings > Privacy & Security** on first launch
 
 ## Gatekeeper
 
-MarkEdit Modal is ad-hoc signed (`CODE_SIGN_IDENTITY = -`), which means macOS Gatekeeper will block it on first launch. To allow it:
+MarkEdit InContext is ad-hoc signed (`CODE_SIGN_IDENTITY = -`), which means macOS Gatekeeper will block it on first launch. To allow it:
 
 1. Try to open the app — macOS will show a warning
 2. Go to **System Settings > Privacy & Security**
-3. Click **Open Anyway** next to the MarkEdit Modal message
+3. Click **Open Anyway** next to the MarkEdit InContext message
 
-With Homebrew, `--no-quarantine` skips this entirely. For seamless distribution without this step, an Apple Developer ID certificate + notarization would be needed.
+With Homebrew, `--no-quarantine` skips this entirely.
 
 ## Usage
 
+### Basic editing
+
 ```sh
-# Edit an existing file
-mem file.md
+# Edit a file (blocks until save or discard)
+eic file.md
 
 # Create and edit a new file
-mem newfile.md
+eic newfile.md
 
 # Open settings
-mem --settings
+eic --settings
 ```
 
-When no arguments are given, `mem` prints usage help.
+### Piping
+
+```sh
+# Stdin to editor, save outputs to stdout
+echo "hello" | eic
+
+# Pipe stdin into an existing file, edit, save back to file
+echo "extra content" | eic notes.md
+
+# Edit a file, pipe saved content to next command
+eic draft.md | wc -w
+
+# Edit without modifying the original, output to stdout
+eic --no-save file.md
+
+# Full pipeline
+curl -s api/data | eic | jq .
+```
+
+### Git integration
+
+```sh
+# Use as git editor (auto-detects commit/rebase/merge/tag titles)
+GIT_EDITOR=eic git commit
+GIT_EDITOR=eic git rebase -i HEAD~3
+
+# Or set globally
+git config --global core.editor eic
+```
+
+### Window title
+
+```sh
+# Set a custom window title
+eic --title "Release Notes" changelog.md
+
+# Files starting with "# Heading" auto-detect the title
+echo "# My Document" > doc.md && eic doc.md
+```
+
+### Non-blocking mode
+
+```sh
+# Open and return immediately (fire-and-forget)
+eic --detach file.md
+```
+
+### CLI reference
+
+```
+Usage: eic [options] [file]
+
+Options:
+  --settings      Open the settings panel
+  --detach        Open and return immediately (don't block)
+  --no-save       Edit a copy; on save, output to stdout (original unchanged)
+  --title <text>  Set the window title
+```
 
 ## Screenshots
 
@@ -71,4 +134,4 @@ When no arguments are given, `mem` prints usage help.
 
 ## Acknowledgments
 
-Built on [CodeMirror 6](https://codemirror.net/). Forked from [MarkEdit](https://github.com/MarkEdit-app/MarkEdit) by [@aspect-build](https://github.com/nicwundram).
+Built on [CodeMirror 6](https://codemirror.net/). Forked from [MarkEdit](https://github.com/MarkEdit-app/MarkEdit) by [@nicwundram](https://github.com/nicwundram).

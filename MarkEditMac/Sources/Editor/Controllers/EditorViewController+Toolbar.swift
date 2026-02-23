@@ -69,6 +69,23 @@ extension EditorViewController {
       $0.identifier.rawValue == identifier.rawValue
     }
   }
+
+  func updateSaveToolbarForModifiers(_ flags: NSEvent.ModifierFlags) {
+    guard let item = saveToolbarItem else { return }
+    let optionHeld = flags.contains(.option)
+
+    if optionHeld {
+      // Show detach variant: save without exiting
+      let detachLabel: String = Application.isOutputMode ? "Output" : "Save"
+      let detachIcon: String = Application.isOutputMode ? "output-detach" : "save-detach"
+      item.label = detachLabel
+      item.image = NSImage(named: detachIcon)
+    } else {
+      // Restore default for current context
+      item.label = Application.saveActionLabel
+      item.image = NSImage(named: Application.saveActionIcon)
+    }
+  }
 }
 
 // MARK: - NSToolbarDelegate
@@ -94,6 +111,8 @@ extension EditorViewController: NSToolbarDelegate {
       case .shareDocument: return shareDocumentItem
       case .copyPandocCommand: return copyPandocCommandItem
       case .writingTools: return writingToolsItem
+      case .copyAll: return copyAllItem
+      case .saveAndExit: return saveAndExitItem
       default:
         if let customItem = customItem(with: itemIdentifier) {
           return .with(identifier: itemIdentifier, customItem: customItem)
@@ -258,8 +277,33 @@ private extension EditorViewController {
   }
 
   var copyPandocCommandItem: NSToolbarItem {
-    // MarkEdit Modal: Pandoc support removed
+    // MarkEdit InContext: Pandoc support removed
     .with(identifier: .copyPandocCommand, menu: nil)
+  }
+
+  var copyAllItem: NSToolbarItem {
+    let item = NSToolbarItem(itemIdentifier: .copyAll)
+    item.label = Localized.Toolbar.copyAll
+    item.image = NSImage(named: "copy-all")
+    item.addAction { [weak self] in
+      self?.copyAll(nil)
+    }
+    return item
+  }
+
+  var saveAndExitItem: NSToolbarItem {
+    let item = NSToolbarItem(itemIdentifier: .saveAndExit)
+    item.label = Application.saveActionLabel
+    item.image = NSImage(named: Application.saveActionIcon)
+    item.addAction { [weak self] in
+      if NSEvent.modifierFlags.contains(.option) {
+        self?.saveWithoutExit()
+      } else {
+        NSApp.sendAction(#selector(NSDocument.save(_:)), to: nil, from: nil)
+      }
+    }
+    saveToolbarItem = item
+    return item
   }
 
   var writingToolsItem: NSToolbarItem? {

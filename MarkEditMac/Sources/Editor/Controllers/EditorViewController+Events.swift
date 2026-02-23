@@ -16,6 +16,11 @@ extension EditorViewController {
         return event
       }
 
+      // Update save toolbar button when Option key state changes
+      if event.type == .flagsChanged, let self {
+        self.updateSaveToolbarForModifiers(event.modifierFlags)
+      }
+
       // Press backspace or option to cancel the correction indicator,
       // it ensures a smoother word completion experience.
       if event.keyCode == .kVK_Delete || event.keyCode == .kVK_Option, let self {
