@@ -6,11 +6,19 @@
 
 # MarkEdit InContext
 
-[![macOS 15+](https://img.shields.io/badge/macOS-15.0+-007bff)](https://github.com/nicwundram/MarkEdit-modal)
+[![macOS 15+](https://img.shields.io/badge/macOS-15.0+-007bff)](https://github.com/wundram/MarkEdit-InContext)
 
 A CLI-launched, in-context Markdown editor for macOS, forked from [MarkEdit](https://github.com/MarkEdit-app/MarkEdit).
 
 Edit text in context — in the middle of a pipe chain, as a git editor, or as a quick-edit tool. The CLI command `eic` (Edit In Context) opens a file, blocks the terminal until you save or discard, and optionally pipes content through stdin/stdout.
+
+## Why this exists
+
+AI agentic workflows increasingly need human-in-the-loop editing — reviewing a generated commit message, tweaking prompt text, fixing a comment before it's posted. These are small, contextual edits that happen in the middle of a pipeline, not inside a project.
+
+The default tool for this is usually a vi/vim variant, which is a poor fit for casual editing. Full editors like VS Code work, but they open into their own file/folder context — confusing when the file you're editing is a temp file with a random name in `/tmp`. And editing directly in the terminal is fragile; one accidental Enter keypress can submit half-written text.
+
+MarkEdit InContext fills this gap: a native macOS editor that opens fast, blocks the calling process, integrates with pipes and git, and gets out of the way when you're done. It's designed for the edit-and-return pattern, not for project management.
 
 ## How it differs from MarkEdit
 
@@ -30,14 +38,14 @@ MarkEdit InContext strips MarkEdit down to a single-purpose tool: edit one file 
 ### Homebrew (recommended)
 
 ```sh
-brew install --no-quarantine nicwundram/tap/markedit-in-context
+brew install --no-quarantine wundram/tap/markedit-in-context
 ```
 
 The `--no-quarantine` flag skips Gatekeeper since the app is ad-hoc signed (see [Gatekeeper note](#gatekeeper) below).
 
 ### Manual
 
-1. Download `MarkEdit-InContext-<version>.zip` from the [latest release](https://github.com/nicwundram/MarkEdit-modal/releases/latest)
+1. Download `MarkEdit-InContext-<version>.zip` from the [latest release](https://github.com/wundram/MarkEdit-InContext/releases/latest)
 2. Unzip and move `MarkEdit InContext.app` to `/Applications`
 3. Copy `Tools/eic` to somewhere on your `$PATH` (e.g. `/usr/local/bin/eic`)
 4. Allow the app in **System Settings > Privacy & Security** on first launch
@@ -134,4 +142,4 @@ Options:
 
 ## Acknowledgments
 
-Built on [CodeMirror 6](https://codemirror.net/). Forked from [MarkEdit](https://github.com/MarkEdit-app/MarkEdit) by [@nicwundram](https://github.com/nicwundram).
+Built on [CodeMirror 6](https://codemirror.net/). Forked from [MarkEdit](https://github.com/MarkEdit-app/MarkEdit) by [@wundram](https://github.com/wundram).

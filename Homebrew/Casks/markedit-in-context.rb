@@ -2,10 +2,10 @@ cask "markedit-in-context" do
   version "0.1.0"
   sha256 "PLACEHOLDER"
 
-  url "https://github.com/nicwundram/MarkEdit-modal/releases/download/v#{version}/MarkEdit-InContext-#{version}.zip"
+  url "https://github.com/wundram/MarkEdit-InContext/releases/download/v#{version}/MarkEdit-InContext-#{version}.zip"
   name "MarkEdit InContext"
   desc "In-context Markdown editor for macOS, launched from the terminal"
-  homepage "https://github.com/nicwundram/MarkEdit-modal"
+  homepage "https://github.com/wundram/MarkEdit-InContext"
 
   depends_on macos: ">= :sequoia"
 
