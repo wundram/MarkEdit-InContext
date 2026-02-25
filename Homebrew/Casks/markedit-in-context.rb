@@ -12,5 +12,8 @@ cask "markedit-in-context" do
   app "MarkEdit InContext.app"
   binary "#{appdir}/MarkEdit InContext.app/Contents/Resources/eic", target: "eic"
 
-  zap trash: "~/Library/Preferences/dev.wundram.eic.plist"
+  zap trash: [
+    "~/Library/Preferences/dev.wundram.eic.plist",
+    "~/.eic",
+  ]
 end

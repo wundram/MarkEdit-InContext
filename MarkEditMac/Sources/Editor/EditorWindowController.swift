@@ -82,8 +82,8 @@ final class EditorWindowController: NSWindowController, NSWindowDelegate {
 
   func windowWillClose(_ notification: Notification) {
     editorViewController?.clearEditor()
-    // MarkEdit InContext: closing the window = quit app
-    NSApp.terminate(nil)
+    // Notify session manager that the document was discarded (closed without save)
+    editorViewController?.document?.notifySessionDiscarded()
   }
 }
 

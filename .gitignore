@@ -4,3 +4,8 @@
 ## User settings
 xcuserdata/
 Local.xcconfig
+
+## SPM build artifacts
+EICShared/.build
+EICServer/.build
+EICClient/.build

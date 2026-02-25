@@ -7,7 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		AA00000200000000000CAFE2 /* mem in Copy CLI Tool */ = {isa = PBXBuildFile; fileRef = AA00000100000000000CAFE1 /* eic */; };
+		EE00000100000000000EIC01 /* EICShared in Frameworks */ = {isa = PBXBuildFile; productRef = EE00000200000000000EIC02 /* EICShared */; };
+		EE00000300000000000EIC03 /* EICServer in Frameworks */ = {isa = PBXBuildFile; productRef = EE00000400000000000EIC04 /* EICServer */; };
+
 		84FB00F02C6C4AED00850E94 /* MarkEditWritingTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 84FB00EF2C6C4AED00850E94 /* MarkEditWritingTools.m */; };
 		8701D0A42CC12321006AF8C2 /* FileVersion in Frameworks */ = {isa = PBXBuildFile; productRef = 8701D0A32CC12321006AF8C2 /* FileVersion */; };
 		87067E2729755D5C0052E795 /* EditorStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87067E2629755D5C0052E795 /* EditorStatusView.swift */; };
@@ -127,18 +129,29 @@
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		AA00000300000000000CAFE3 /* Copy CLI Tool */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 7;
-			files = (
-				AA00000200000000000CAFE2 /* mem in Copy CLI Tool */,
-			);
-			name = "Copy CLI Tool";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		33BC73082F4E310900C3DCD9 /* Build and Copy eic CLI */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/EICClient/Sources/EICCommand.swift",
+				"$(SRCROOT)/EICClient/Sources/ServerLauncher.swift",
+				"$(SRCROOT)/EICClient/Sources/GitAutoTitle.swift",
+				"$(SRCROOT)/EICClient/Package.swift",
+			);
+			name = "Build and Copy eic CLI";
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/eic",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "cd \"$SRCROOT/EICClient\"\nif [ \"$CONFIGURATION\" = \"Release\" ]; then\n  swift build -c release --arch arm64 --arch x86_64 2>&1\n  cp .build/apple/Products/Release/eic \"$BUILT_PRODUCTS_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/eic\"\nelse\n  swift build 2>&1\n  cp .build/debug/eic \"$BUILT_PRODUCTS_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/eic\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXFileReference section */
 		AA00000100000000000CAFE1 /* eic */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = eic; path = Tools/eic; sourceTree = "<group>"; };
@@ -161,6 +174,8 @@
 		870C59C62EC61261003882BD /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		870F17652984D2C000003DA7 /* EditorViewController+LineEndings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EditorViewController+LineEndings.swift"; sourceTree = "<group>"; };
 		870F17672985285B00003DA7 /* EditorViewController+Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EditorViewController+Config.swift"; sourceTree = "<group>"; };
+		EE00000500000000000EIC05 /* EICShared */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = EICShared; sourceTree = "<group>"; };
+		EE00000600000000000EIC06 /* EICServer */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = EICServer; sourceTree = "<group>"; };
 		870F17752985546500003DA7 /* MarkEditCore */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = MarkEditCore; sourceTree = "<group>"; };
 		870F178C2985774D00003DA7 /* Modules */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Modules; sourceTree = "<group>"; };
 		87132AA22C188FE900FD262B /* AppShortcuts.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = AppShortcuts.xcstrings; sourceTree = "<group>"; };
@@ -251,6 +266,8 @@
 				874823CE29B0BD980067EC49 /* TextCompletion in Frameworks */,
 				870F178E2985775B00003DA7 /* AppKitControls in Frameworks */,
 				870F17962985775B00003DA7 /* SettingsUI in Frameworks */,
+				EE00000100000000000EIC01 /* EICShared in Frameworks */,
+				EE00000300000000000EIC03 /* EICServer in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -285,6 +302,8 @@
 		870A5199294700DE0095C7EB = {
 			isa = PBXGroup;
 			children = (
+				EE00000500000000000EIC05 /* EICShared */,
+				EE00000600000000000EIC06 /* EICServer */,
 				870F17752985546500003DA7 /* MarkEditCore */,
 				87C3CBFA29545944002A3436 /* MarkEditKit */,
 				87BFF238298AAC75006C31E4 /* MarkEditTools */,
@@ -559,7 +578,7 @@
 				870A519F294700DE0095C7EB /* Frameworks */,
 				870A51A0294700DE0095C7EB /* Resources */,
 				872924112951525C007156B1 /* Embed Foundation Extensions */,
-				AA00000300000000000CAFE3 /* Copy CLI Tool */,
+				33BC73082F4E310900C3DCD9 /* Build and Copy eic CLI */,
 			);
 			buildRules = (
 			);
@@ -570,6 +589,8 @@
 			);
 			name = MarkEditMac;
 			packageProductDependencies = (
+				EE00000200000000000EIC02 /* EICShared */,
+				EE00000400000000000EIC04 /* EICServer */,
 				870F177C29855CA500003DA7 /* MarkEditKit */,
 				870F178D2985775B00003DA7 /* AppKitControls */,
 				870F178F2985775B00003DA7 /* AppKitExtensions */,
@@ -974,6 +995,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = MarkEditMac/Info.entitlements;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				CODE_SIGN_IDENTITY = "$(inherited)";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -1012,6 +1034,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = MarkEditMac/Info.entitlements;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				CODE_SIGN_IDENTITY = "$(inherited)";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -1234,6 +1257,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		EE00000200000000000EIC02 /* EICShared */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = EICShared;
+		};
+		EE00000400000000000EIC04 /* EICServer */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = EICServer;
+		};
 		8701D0A32CC12321006AF8C2 /* FileVersion */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = FileVersion;

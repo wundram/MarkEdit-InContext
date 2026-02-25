@@ -8,9 +8,11 @@ import AppKit
 import AppKitExtensions
 import SettingsUI
 import MarkEditKit
+import EICServer
+import EICShared
 
 @MainActor
-final class AppDelegate: NSObject, NSApplicationDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, EICServiceDelegate {
   @IBOutlet weak var mainFileMenu: NSMenu?
   @IBOutlet weak var mainEditMenu: NSMenu?
   @IBOutlet weak var mainExtensionsMenu: NSMenu?
@@ -43,6 +45,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
   private var appearanceObservation: NSKeyValueObservation?
   private var settingsWindowController: NSWindowController?
+  private(set) var serverManager: EICServerManager?
 
   func applicationDidFinishLaunching(_ notification: Notification) {
     NSApp.appearance = AppPreferences.General.appearance.resolved()
@@ -76,16 +79,35 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     // Install uncaught exception handler
     AppExceptionCatcher.install()
+
+    // Start gRPC server for CLI communication
+    let manager = EICServerManager(delegate: self)
+    self.serverManager = manager
+    manager.start()
   }
 
   func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-    // In settings-only mode, quit when the settings window is closed
-    Application.launchIntoSettings
+    // App stays running as a persistent server
+    false
   }
 
   func applicationShouldTerminate(_ application: NSApplication) -> NSApplication.TerminateReply {
-    // MarkEdit InContext: quit = discard, always terminate immediately
-    return .terminateNow
+    // Drain all pending edit sessions so CLI clients receive their discard responses
+    // before we tear down the gRPC server.
+    EditSessionManager.shared.discardAll()
+
+    Task { @MainActor in
+      // Give NIO time to flush the responses to connected clients
+      try? await Task.sleep(for: .milliseconds(200))
+      self.serverManager?.stop()
+      NSApp.reply(toApplicationShouldTerminate: true)
+    }
+
+    return .terminateLater
+  }
+
+  func applicationWillTerminate(_ notification: Notification) {
+    EICSocket.removePortFile()
   }
 
   func shouldOpenOrCreateDocument() -> Bool {
@@ -115,6 +137,49 @@ extension AppDelegate {
         break
       }
     }
+  }
+}
+
+// MARK: - EICServiceDelegate
+
+extension AppDelegate {
+  func eicLog(_ message: String) {
+    let path = EICSocket.directoryPath + "/debug.log"
+    let line = "\(Date()) [AppDelegate]: \(message)\n"
+    if let handle = FileHandle(forWritingAtPath: path) {
+      handle.seekToEndOfFile()
+      handle.write(Data(line.utf8))
+      handle.closeFile()
+    } else {
+      try? line.write(toFile: path, atomically: true, encoding: .utf8)
+    }
+  }
+
+  func openEditSession(_ session: EditSession) async {
+    eicLog("openEditSession called, id=\(session.id)")
+    let request = session.request
+    let title = request.title.isEmpty ? nil : request.title
+
+    // All file I/O is handled by the CLI. The app only works with content in memory.
+    let document = EditorDocument()
+    document.stringValue = request.initialContent
+    document.sessionID = session.id
+    document.sessionTitle = title
+    document.sessionIsOutputMode = request.stdoutPiped || request.noSave
+    document.sessionIsDetached = request.detach
+    document.sessionIsSudo = request.sudo
+    NSDocumentController.shared.addDocument(document)
+    document.makeWindowControllers()
+    document.showWindows()
+    NSApp.activate()
+  }
+
+  func openSettings() {
+    showPreferences(nil)
+  }
+
+  func quitApp() {
+    NSApp.terminate(nil)
   }
 }
 

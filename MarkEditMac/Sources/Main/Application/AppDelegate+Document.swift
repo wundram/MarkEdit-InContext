@@ -7,6 +7,7 @@
 
 import AppKit
 import MarkEditKit
+import EICServer
 
 @MainActor
 extension AppDelegate {
@@ -30,14 +31,25 @@ extension AppDelegate {
 
   /// Open a file from the launch path. If the file doesn't exist, open an empty buffer
   /// with the fileURL set so Save creates it.
-  func openLaunchFile(path: String) {
+  func openLaunchFile(path: String, session: EditSession? = nil, title: String? = nil, isOutputMode: Bool = false, isDetached: Bool = false) {
     let fileURL = URL(fileURLWithPath: path)
+    (NSApp.delegate as? AppDelegate)?.eicLog("openLaunchFile path=\(path) exists=\(FileManager.default.fileExists(atPath: path)) session=\(session?.id.uuidString ?? "nil")")
 
     if FileManager.default.fileExists(atPath: path) {
       // Existing file: open it via the document controller
-      NSDocumentController.shared.openDocument(withContentsOf: fileURL, display: true) { _, _, error in
+      NSDocumentController.shared.openDocument(withContentsOf: fileURL, display: true) { document, _, error in
+        (NSApp.delegate as? AppDelegate)?.eicLog("openDocument callback: doc=\(String(describing: document)) error=\(String(describing: error)) wcs=\(document?.windowControllers.count ?? -1)")
         if let error {
           Logger.log(.error, "Failed to open file: \(error.localizedDescription)")
+        }
+        if let doc = document as? EditorDocument {
+          doc.sessionID = session?.id
+          doc.sessionTitle = title
+          doc.sessionIsOutputMode = isOutputMode
+          doc.sessionIsDetached = isDetached
+          // Ensure window is visible and app is frontmost
+          doc.showWindows()
+          NSApp.activate()
         }
       }
     } else {
@@ -45,6 +57,10 @@ extension AppDelegate {
       let document = EditorDocument()
       document.stringValue = ""
       document.fileURL = fileURL
+      document.sessionID = session?.id
+      document.sessionTitle = title
+      document.sessionIsOutputMode = isOutputMode
+      document.sessionIsDetached = isDetached
       NSDocumentController.shared.addDocument(document)
       document.makeWindowControllers()
       document.showWindows()

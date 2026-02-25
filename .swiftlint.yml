@@ -1,3 +1,11 @@
+excluded:
+  - EICShared/.build
+  - EICServer/.build
+  - EICClient/.build
+  - EICShared/Sources/Generated
+  - EICClient/Sources
+  - EICServer/Sources
+
 disabled_rules:
 
   # Rationale: Arbitrary restriction

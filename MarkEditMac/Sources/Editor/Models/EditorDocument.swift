@@ -5,8 +5,10 @@
 //  Created by cyan on 12/12/22.
 
 import AppKit
+import Foundation
 import MarkEditKit
 import TextBundle
+import EICServer
 
 /**
  Main document used to deal with markdown files and text bundles.
@@ -21,6 +23,15 @@ final class EditorDocument: NSDocument {
   var isOutdated = false // The content is outdated, needs an update
   var isReadOnlyMode = false
   var isTerminating = false
+  var lastSaveFailed = false
+  var lastSaveError: String?
+
+  // Per-document session properties (set by gRPC EditRequest)
+  var sessionID: UUID?
+  var sessionTitle: String?
+  var sessionIsOutputMode = false
+  var sessionIsDetached = false
+  var sessionIsSudo = false
 
   var canUndo: Bool {
     get async {
@@ -106,6 +117,19 @@ final class EditorDocument: NSDocument {
 
     NSApplication.shared.closeOpenPanels()
     addWindowController(windowController)
+
+    // Sudo sessions get a red titlebar strip as a visual warning
+    if sessionIsSudo, let window = windowController.window {
+      let accessory = NSTitlebarAccessoryViewController()
+      let bar = NSView()
+      bar.wantsLayer = true
+      bar.layer?.backgroundColor = NSColor(red: 0.7, green: 0.1, blue: 0.1, alpha: 1.0).cgColor
+      bar.translatesAutoresizingMaskIntoConstraints = false
+      bar.heightAnchor.constraint(equalToConstant: 3).isActive = true
+      accessory.view = bar
+      accessory.layoutAttribute = .bottom
+      window.addTitlebarAccessoryViewController(accessory)
+    }
 
     #if DEBUG
       if ProcessInfo.processInfo.environment["DEBUG_TAKING_SCREENSHOTS"] == "YES" {
@@ -198,8 +222,8 @@ extension EditorDocument {
 
   override var displayName: String? {
     get {
-      // --title flag takes highest priority
-      if let title = Application.launchTitle {
+      // Per-session title from gRPC request, or legacy --title flag
+      if let title = sessionTitle ?? Application.launchTitle {
         return title
       }
 
@@ -322,16 +346,48 @@ extension EditorDocument {
     }
   }
 
-  // MarkEdit InContext: save behavior depends on launch context and Option key.
-  // Option key held → always save without exiting (detach override).
-  // Detached mode → save without exiting.
-  // Otherwise → save and terminate.
+  // MarkEdit InContext: save behavior depends on session state and Option key.
+  // Option key held → always save without closing (detach override).
+  // Detached session → save without closing.
+  // RPC session → sync content from editor, send back via gRPC (no disk write).
+  // Legacy (no session) → save to disk and close.
   override func save(_ sender: Any?) {
     let optionHeld = NSEvent.modifierFlags.contains(.option)
-    let shouldExit = !Application.isDetached && !optionHeld
-    saveContent(sender: sender, userInitiated: true) {
-      if shouldExit {
-        NSApp.terminate(nil)
+    let isDetached = sessionIsDetached || Application.isDetached
+    let shouldClose = !isDetached && !optionHeld
+
+    if sessionID != nil {
+      // RPC session: sync content from editor and send back via gRPC, no disk I/O
+      Task { @MainActor in
+        await updateContent(userInitiated: true)
+        if shouldClose {
+          notifySessionSaved()
+          close()
+        }
+      }
+    } else {
+      // Legacy path: save to disk
+      lastSaveFailed = false
+      lastSaveError = nil
+      saveContent(sender: sender, userInitiated: true) { [weak self] in
+        guard let self else { return }
+        if shouldClose {
+          if self.lastSaveFailed {
+            Task { @MainActor in
+              let errorMessage = self.lastSaveError ?? "The file could not be saved."
+              let response = await self.hostViewController?.showAlert(
+                title: "Save Failed",
+                message: errorMessage,
+                buttons: ["Close Anyway", "Stay Open"]
+              )
+              if response == .alertFirstButtonReturn {
+                self.close()
+              }
+            }
+          } else {
+            self.close()
+          }
+        }
       }
     }
   }
@@ -416,12 +472,19 @@ extension EditorDocument {
   }
 
   override func write(to url: URL, ofType typeName: String) throws {
-    guard typeName.isTextBundle else {
-      return try super.write(to: url, ofType: typeName)
+    do {
+      if typeName.isTextBundle {
+        let fileWrapper = try? textBundle?.fileWrapper(with: try data(ofType: typeName))
+        try fileWrapper?.write(to: url, originalContentsURL: nil)
+      } else {
+        try super.write(to: url, ofType: typeName)
+      }
+    } catch {
+      lastSaveFailed = true
+      lastSaveError = error.localizedDescription
+      Logger.log(.error, "Save failed: \(error.localizedDescription)")
+      throw error
     }
-
-    let fileWrapper = try? textBundle?.fileWrapper(with: try data(ofType: typeName))
-    try fileWrapper?.write(to: url, originalContentsURL: nil)
   }
 
   override func duplicate() throws -> NSDocument {
@@ -469,6 +532,28 @@ extension EditorDocument {
       let operation = NSPrintOperation(view: textView)
       operation.runModal(for: window, delegate: nil, didRun: nil, contextInfo: nil)
     }
+  }
+}
+
+// MARK: - Session Manager
+
+extension EditorDocument {
+  func notifySessionSaved() {
+    guard let sessionID else { return }
+    EditSessionManager.shared.notifySaved(sessionID: sessionID, content: stringValue)
+    self.sessionID = nil
+  }
+
+  func notifySessionDiscarded() {
+    guard let sessionID else { return }
+    EditSessionManager.shared.notifyDiscarded(sessionID: sessionID)
+    self.sessionID = nil
+  }
+
+  func notifySessionError(_ message: String) {
+    guard let sessionID else { return }
+    EditSessionManager.shared.notifyError(sessionID: sessionID, message: message)
+    self.sessionID = nil
   }
 }
 

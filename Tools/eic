@@ -26,6 +26,7 @@ Options:
   --detach        Open and return immediately (don't block)
   --no-save       Edit a copy; on save, output to stdout (original unchanged)
   --title <text>  Set the window title
+  --env           Print EDITOR/GIT_EDITOR exports (use: eval "\$(eic --env)")
 
 Piping:
   echo "text" | eic              Stdin → editor → stdout on save
@@ -35,6 +36,9 @@ Piping:
 
 Git:
   GIT_EDITOR=eic git commit      Blocks until save or discard
+
+Setup:
+  eval "\$(eic --env)"            Set EDITOR and GIT_EDITOR to eic
 
 Without arguments, prints this help.
 EOF
@@ -67,6 +71,11 @@ while [ $# -gt 0 ]; do
       [ $# -ge 2 ] || { echo "eic: --title requires a value" >&2; exit 1; }
       TITLE="$2"
       shift 2
+      ;;
+    --env)
+      echo "export EDITOR=eic"
+      echo "export GIT_EDITOR=eic"
+      exit 0
       ;;
     -*)
       echo "eic: unknown option: $1" >&2
@@ -196,13 +205,19 @@ if [ ${#CONTEXT_PARTS[@]} -gt 0 ]; then
   APP_ARGS+=(--context "$CONTEXT_STR")
 fi
 
+logger -t eic "launch: file=$EDIT_PATH detach=$DETACH no_save=$NO_SAVE stdout_piped=$STDOUT_PIPED"
+
 if $DETACH; then
   open -a "$APP_PATH" "$EDIT_PATH" --args "${APP_ARGS[@]+"${APP_ARGS[@]}"}"
   exit 0
 fi
 
 # Blocking: -n for new instance, -W to wait
-open -n -W -a "$APP_PATH" "$EDIT_PATH" --args "${APP_ARGS[@]+"${APP_ARGS[@]}"}"
+OPEN_RC=0
+open -n -W -a "$APP_PATH" "$EDIT_PATH" --args "${APP_ARGS[@]+"${APP_ARGS[@]}"}" || OPEN_RC=$?
+if [ "$OPEN_RC" -ne 0 ]; then
+  logger -t eic "app exited with code $OPEN_RC"
+fi
 
 # --- Post-edit: detect save via mtime ---
 
@@ -230,3 +245,5 @@ if $SAVED; then
     cat "$EDIT_PATH"
   fi
 fi
+
+exit 0

@@ -23,7 +23,16 @@ final class Application: NSApplication {
 
   /// Label for the save/exit action based on launch context
   static var saveActionLabel: String {
-    switch (isOutputMode, isDetached) {
+    labelForContext(isOutput: isOutputMode, isDetached: isDetached)
+  }
+
+  /// Asset name for the save/exit toolbar icon
+  static var saveActionIcon: String {
+    iconForContext(isOutput: isOutputMode, isDetached: isDetached)
+  }
+
+  static func labelForContext(isOutput: Bool, isDetached: Bool) -> String {
+    switch (isOutput, isDetached) {
     case (false, false): return "Save and Exit"
     case (true, false):  return "Output and Exit"
     case (false, true):  return "Save"
@@ -31,9 +40,8 @@ final class Application: NSApplication {
     }
   }
 
-  /// Asset name for the save/exit toolbar icon
-  static var saveActionIcon: String {
-    switch (isOutputMode, isDetached) {
+  static func iconForContext(isOutput: Bool, isDetached: Bool) -> String {
+    switch (isOutput, isDetached) {
     case (false, false): return "save-and-exit"
     case (true, false):  return "output-and-exit"
     case (false, true):  return "save-detach"

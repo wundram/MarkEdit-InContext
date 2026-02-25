@@ -74,16 +74,19 @@ extension EditorViewController {
     guard let item = saveToolbarItem else { return }
     let optionHeld = flags.contains(.option)
 
+    let isOutput = document?.sessionIsOutputMode ?? Application.isOutputMode
+    let isDetached = document?.sessionIsDetached ?? Application.isDetached
+
     if optionHeld {
       // Show detach variant: save without exiting
-      let detachLabel: String = Application.isOutputMode ? "Output" : "Save"
-      let detachIcon: String = Application.isOutputMode ? "output-detach" : "save-detach"
+      let detachLabel: String = isOutput ? "Output" : "Save"
+      let detachIcon: String = isOutput ? "output-detach" : "save-detach"
       item.label = detachLabel
       item.image = NSImage(named: detachIcon)
     } else {
       // Restore default for current context
-      item.label = Application.saveActionLabel
-      item.image = NSImage(named: Application.saveActionIcon)
+      item.label = Application.labelForContext(isOutput: isOutput, isDetached: isDetached)
+      item.image = NSImage(named: Application.iconForContext(isOutput: isOutput, isDetached: isDetached))
     }
   }
 }
@@ -293,8 +296,10 @@ private extension EditorViewController {
 
   var saveAndExitItem: NSToolbarItem {
     let item = NSToolbarItem(itemIdentifier: .saveAndExit)
-    item.label = Application.saveActionLabel
-    item.image = NSImage(named: Application.saveActionIcon)
+    let isOutput = document?.sessionIsOutputMode ?? Application.isOutputMode
+    let isDetached = document?.sessionIsDetached ?? Application.isDetached
+    item.label = Application.labelForContext(isOutput: isOutput, isDetached: isDetached)
+    item.image = NSImage(named: Application.iconForContext(isOutput: isOutput, isDetached: isDetached))
     item.addAction { [weak self] in
       if NSEvent.modifierFlags.contains(.option) {
         self?.saveWithoutExit()
