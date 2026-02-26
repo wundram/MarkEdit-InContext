@@ -387,33 +387,6 @@ extension EditorViewController {
   }
 
   func resetUserDefinedMenuItems() {
-    guard view.window?.isKeyWindow == true else {
-      return Logger.log(.debug, "Menu items are for the key window")
-    }
-
-    guard let menu = NSApp.appDelegate?.mainExtensionsMenu else {
-      return Logger.assertFail("Missing main extensions menu")
-    }
-
-    // Remove existing ones, always recreate a new item
-    (menu.items.filter {
-      $0.identifier?.rawValue.hasPrefix(EditorMenuItem.uniquePrefix) == true
-    }).forEach {
-      menu.removeItem($0)
-    }
-
-    for spec in userDefinedMenuItems {
-      let item = createMenuItem(spec: spec.item, handler: bridge.api.handleMainMenuAction)
-      item.identifier = NSUserInterfaceItemIdentifier("\(EditorMenuItem.uniquePrefix).\(spec.id)")
-
-      // Preferably, make it the last one before the special divider
-      if let index = (menu.items.firstIndex { $0.identifier?.rawValue == EditorMenuItem.specialDivider }) {
-        menu.insertItem(item, at: index)
-      } else {
-        menu.addItem(item)
-      }
-    }
-
     resetCustomToolbarItems()
   }
 

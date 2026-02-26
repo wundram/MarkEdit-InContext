@@ -13,8 +13,6 @@ extension AppDelegate: NSMenuDelegate {
     switch menu {
     case mainEditMenu:
       reconfigureMainEditMenu(document: currentDocument)
-    case mainExtensionsMenu:
-      reconfigureMainExtensionsMenu(document: currentDocument)
     case mainWindowMenu:
       reconfigureMainWindowMenu(document: currentDocument)
     default:
@@ -40,13 +38,6 @@ private extension AppDelegate {
     editTypewriterItem?.setOn(AppPreferences.Editor.typewriterMode)
   }
 
-  func reconfigureMainExtensionsMenu(document: EditorDocument?) {
-    mainExtensionsMenu?.items.forEach {
-      let isEnabled = $0.target === NSApp.appDelegate || document != nil
-      $0.setEnabledRecursively(isEnabled: isEnabled)
-    }
-  }
-
   func reconfigureMainWindowMenu(document: EditorDocument?) {
     windowFloatingItem?.isEnabled = NSApp.keyWindow is EditorWindow
     windowFloatingItem?.setOn(NSApp.keyWindow?.level == .floating)
@@ -56,18 +47,6 @@ private extension AppDelegate {
 // MARK: - Private
 
 private extension AppDelegate {
-  @IBAction func openDocumentsFolder(_ sender: Any?) {
-    NSWorkspace.shared.open(URL.documentsDirectory)
-  }
-
-  @IBAction func openDevelopmentGuide(_ sender: Any?) {
-    NSWorkspace.shared.safelyOpenURL(string: "https://github.com/MarkEdit-app/MarkEdit/wiki/Development")
-  }
-
-  @IBAction func openCustomizationGuide(_ sender: Any?) {
-    NSWorkspace.shared.safelyOpenURL(string: "https://github.com/MarkEdit-app/MarkEdit/wiki/Customization")
-  }
-
   @IBAction func showHelp(_ sender: Any?) {
     NSWorkspace.shared.safelyOpenURL(string: "https://github.com/MarkEdit-app/MarkEdit/wiki")
   }

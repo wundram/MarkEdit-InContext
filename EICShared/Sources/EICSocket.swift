@@ -2,10 +2,15 @@ import Foundation
 
 public enum EICSocket {
   public static let directoryPath: String = {
-    // Use the real home directory, not the sandbox container path.
-    // getpwuid returns the actual home even in sandboxed apps.
+    // Resolve the real user's home directory, handling three cases:
+    // 1. sudo: SUDO_USER is set — look up that user's home via getpwnam
+    // 2. Sandboxed app: getpwuid gives real home (not the container)
+    // 3. Normal CLI: getpwuid gives the current user's home
     let home: String
-    if let pw = getpwuid(getuid()), let dir = pw.pointee.pw_dir {
+    if let sudoUser = ProcessInfo.processInfo.environment["SUDO_USER"],
+       let pw = getpwnam(sudoUser), let dir = pw.pointee.pw_dir {
+      home = String(cString: dir)
+    } else if let pw = getpwuid(getuid()), let dir = pw.pointee.pw_dir {
       home = String(cString: dir)
     } else {
       home = NSHomeDirectory()

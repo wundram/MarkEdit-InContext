@@ -36,4 +36,6 @@ message OpenSettingsResponse {}
 message QuitRequest {}
 message QuitResponse {}
 message PingRequest {}
-message PingResponse {}
+message PingResponse {
+  string version = 1;
+}

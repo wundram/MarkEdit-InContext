@@ -23,11 +23,8 @@ public struct EICServiceImpl: Eic_V1_EditorService.SimpleServiceProtocol, Sendab
     context: ServerContext
   ) async throws -> Eic_V1_EditResponse {
     let session = EditSession(request: request)
-    NSLog("[EICService] Edit RPC: file=%@, title=%@, sessionID=%@", request.filePath, request.title, session.id.uuidString)
     await delegate.openEditSession(session)
-    NSLog("[EICService] Session opened, awaiting outcome...")
     let response = await sessionManager.awaitOutcome(for: session)
-    NSLog("[EICService] Outcome: %d", response.outcome.rawValue)
     return response
   }
 
@@ -55,6 +52,8 @@ public struct EICServiceImpl: Eic_V1_EditorService.SimpleServiceProtocol, Sendab
     request: Eic_V1_PingRequest,
     context: ServerContext
   ) async throws -> Eic_V1_PingResponse {
-    return Eic_V1_PingResponse()
+    var response = Eic_V1_PingResponse()
+    response.version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "unknown"
+    return response
   }
 }

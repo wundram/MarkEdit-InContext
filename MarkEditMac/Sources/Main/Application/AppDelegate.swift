@@ -15,7 +15,6 @@ import EICShared
 final class AppDelegate: NSObject, NSApplicationDelegate, EICServiceDelegate {
   @IBOutlet weak var mainFileMenu: NSMenu?
   @IBOutlet weak var mainEditMenu: NSMenu?
-  @IBOutlet weak var mainExtensionsMenu: NSMenu?
   @IBOutlet weak var mainWindowMenu: NSMenu?
 
   @IBOutlet weak var editCommandsMenu: NSMenu?
@@ -41,7 +40,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, EICServiceDelegate {
   @IBOutlet weak var formatMathBlockItem: NSMenuItem?
   @IBOutlet weak var windowFloatingItem: NSMenuItem?
   @IBOutlet weak var saveMenuItem: NSMenuItem?
-  @IBOutlet weak var quitMenuItem: NSMenuItem?
 
   private var appearanceObservation: NSKeyValueObservation?
   private var settingsWindowController: NSWindowController?
@@ -66,9 +64,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, EICServiceDelegate {
       EditorReusePool.shared.warmUp()
     }
 
-    // Update menu item titles based on launch context
+    // Update menu item title based on launch context
     saveMenuItem?.title = Application.saveActionLabel
-    quitMenuItem?.title = "Discard and Exit"
 
     // MarkEdit InContext: open settings or file from command line
     if Application.launchIntoSettings {

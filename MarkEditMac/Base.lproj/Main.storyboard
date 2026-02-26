@@ -26,38 +26,6 @@
                                                 <action selector="showPreferences:" target="Voe-Tx-rLC" id="NhX-ob-GbB"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="wFC-TO-SCJ"/>
-                                        <menuItem title="Services" secondaryImage="gearshape.2" catalog="system" id="NMo-om-nkz">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <menu key="submenu" title="Services" systemMenu="services" id="hz9-B4-Xy5"/>
-                                        </menuItem>
-                                        <menuItem title="Developer" secondaryImage="curlybraces" catalog="system" id="qjf-Yo-EMd">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <menu key="submenu" title="Developer" id="KrK-C3-Ckx">
-                                                <items>
-                                                    <menuItem title="Inspect Element" keyEquivalent="i" id="WbI-eI-YNA">
-                                                        <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
-                                                        <connections>
-                                                            <action selector="inspectElement:" target="Ady-hI-5gd" id="4pe-hk-w1S"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem isSeparatorItem="YES" id="eWs-Yl-9uf"/>
-                                                    <menuItem title="Open Documents Folder" id="WAg-qh-q9G">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="openDocumentsFolder:" target="Voe-Tx-rLC" id="cD9-hQ-p0k"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem isSeparatorItem="YES" id="USk-ey-oWO"/>
-                                                    <menuItem title="Development Guide" id="aSl-kC-hp8">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="openDevelopmentGuide:" target="Voe-Tx-rLC" id="uTv-ru-P3h"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                </items>
-                                            </menu>
-                                        </menuItem>
                                         <menuItem isSeparatorItem="YES" id="4je-JR-u6R"/>
                                         <menuItem title="Hide MarkEdit InContext" keyEquivalent="h" id="Olw-nP-bQN">
                                             <connections>
@@ -77,7 +45,7 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="kCx-OE-vgT"/>
-                                        <menuItem title="Discard and Exit" keyEquivalent="q" id="4sb-4s-VLi">
+                                        <menuItem title="Quit" keyEquivalent="q" id="4sb-4s-VLi">
                                             <connections>
                                                 <action selector="terminate:" target="Ady-hI-5gd" id="Te7-pn-YzF"/>
                                             </connections>
@@ -92,6 +60,11 @@
                                         <menuItem title="Save and Exit" keyEquivalent="s" id="pxx-59-PXV">
                                             <connections>
                                                 <action selector="saveDocument:" target="Ady-hI-5gd" id="teZ-XB-qJY"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Discard" keyEquivalent="w" id="eic-discard-w">
+                                            <connections>
+                                                <action selector="performClose:" target="Ady-hI-5gd" id="eic-discard-act"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Save a Copy…" keyEquivalent="S" id="Bw7-FT-i3A">
@@ -623,29 +596,6 @@ Gw
                                     </items>
                                 </menu>
                             </menuItem>
-                            <menuItem title="Extensions" id="mGH-Xd-vai">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="Extensions" autoenablesItems="NO" id="nkD-z6-yjV">
-                                    <items>
-                                        <menuItem isSeparatorItem="YES" identifier="extensionsMenuDivider" id="Jat-X6-g2Q"/>
-                                        <menuItem title="Open Documents Folder" id="fyH-S9-f9N">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="openDocumentsFolder:" target="Voe-Tx-rLC" id="cGC-yM-BaF"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Customization Guide" id="jNi-CL-4bf">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="openCustomizationGuide:" target="Voe-Tx-rLC" id="dXE-Va-wF2"/>
-                                            </connections>
-                                        </menuItem>
-                                    </items>
-                                    <connections>
-                                        <outlet property="delegate" destination="Voe-Tx-rLC" id="bdE-rU-LpO"/>
-                                    </connections>
-                                </menu>
-                            </menuItem>
                             <menuItem title="View" id="H8h-7b-M4v">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="View" id="HyV-fh-RgO">
@@ -788,13 +738,11 @@ Gw
                         <outlet property="formatNumberingItem" destination="vhv-qY-5Gc" id="rOt-cw-00U"/>
                         <outlet property="formatTodoItem" destination="DZc-Ee-Asp" id="O5Q-gx-Kg0"/>
                         <outlet property="mainEditMenu" destination="W48-6f-4Dl" id="xUc-Fy-SjE"/>
-                        <outlet property="mainExtensionsMenu" destination="nkD-z6-yjV" id="40H-WY-xHu"/>
                         <outlet property="mainFileMenu" destination="bib-Uj-vzu" id="cNR-Lu-ST1"/>
                         <outlet property="mainWindowMenu" destination="Td7-aD-5lo" id="9j1-c6-lEO"/>
                         <outlet property="textFormatMenu" destination="yy7-cF-JbT" id="FfG-yi-NE6"/>
                         <outlet property="windowFloatingItem" destination="0C5-FE-fvI" id="hM7-gl-t1f"/>
                         <outlet property="saveMenuItem" destination="pxx-59-PXV" id="sav-mn-001"/>
-                        <outlet property="quitMenuItem" destination="4sb-4s-VLi" id="qut-mn-001"/>
                     </connections>
                 </customObject>
                 <customObject id="YLy-65-1bz" customClass="NSFontManager"/>

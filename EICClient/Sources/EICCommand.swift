@@ -14,6 +14,12 @@ struct EICCommand: AsyncParsableCommand {
   @Option(name: .long, help: "Set the window title")
   var title: String?
 
+  @Flag(name: .shortAndLong, help: "Show debug output on stderr")
+  var verbose = false
+
+  @Flag(name: .long, help: "Show version information")
+  var version = false
+
   @Flag(name: .long, help: "Edit a copy; on save, output to stdout (original unchanged)")
   var noSave = false
 
@@ -33,6 +39,27 @@ struct EICCommand: AsyncParsableCommand {
   var file: String?
 
   func run() async throws {
+    ServerLauncher.verbose = verbose
+
+    // --version: show client and server versions
+    if version {
+      print("eic 0.2.0 (client)")
+      if let port = EICSocket.readPort() {
+        do {
+          let serverVersion: String = try await Self.withGRPCClient(port: port) { client in
+            let response = try await client.ping(Eic_V1_PingRequest())
+            return response.version.isEmpty ? "unknown" : response.version
+          }
+          print("\(ServerLauncher.appName) \(serverVersion) (server)")
+        } catch {
+          print("\(ServerLauncher.appName) (server not reachable)")
+        }
+      } else {
+        print("\(ServerLauncher.appName) (server not running)")
+      }
+      return
+    }
+
     // --env: print exports and exit
     if env {
       print("export EDITOR=eic")
@@ -73,10 +100,16 @@ struct EICCommand: AsyncParsableCommand {
       absolutePath = url.standardizedFileURL.path
     }
 
-    // Git auto-title
+    // Auto-title: git context → basename → stdin
     var resolvedTitle = title
     if resolvedTitle == nil, let absolutePath {
       resolvedTitle = GitAutoTitle.detect(filePath: absolutePath)
+    }
+    if resolvedTitle == nil, let absolutePath {
+      resolvedTitle = URL(fileURLWithPath: absolutePath).lastPathComponent
+    }
+    if resolvedTitle == nil && stdinPiped {
+      resolvedTitle = "stdin"
     }
 
     // Read stdin if piped
@@ -114,10 +147,14 @@ struct EICCommand: AsyncParsableCommand {
       return r
     }()
 
+    ServerLauncher.debug("Edit RPC: file=\(request.filePath), title=\(request.title), noSave=\(request.noSave), detach=\(request.detach), sudo=\(request.sudo), contentLen=\(request.initialContent.count)")
+
     // Send the RPC — blocks until user saves or discards
     let response: Eic_V1_EditResponse = try await withClient { client in
       try await client.edit(request)
     }
+
+    ServerLauncher.debug("Response: outcome=\(response.outcome)")
 
     // Handle response — CLI writes content back to disk
     switch response.outcome {
@@ -125,12 +162,15 @@ struct EICCommand: AsyncParsableCommand {
       if stdoutPiped || noSave {
         // Output to stdout
         print(response.content, terminator: "")
+        ServerLauncher.debug("Wrote \(response.content.count) chars to stdout")
       } else if let absolutePath {
         // Write content back to the file
         try response.content.write(toFile: absolutePath, atomically: true, encoding: .utf8)
+        ServerLauncher.debug("Wrote \(response.content.count) chars to \(absolutePath)")
       }
 
     case .discarded:
+      ServerLauncher.debug("Discarded — exiting with code 1")
       throw ExitCode(1)
 
     case .error:
@@ -139,6 +179,7 @@ struct EICCommand: AsyncParsableCommand {
       throw ExitCode(1)
 
     case .detached:
+      ServerLauncher.debug("Detached — returning immediately")
       break
 
     case .UNRECOGNIZED, .unspecified:
@@ -167,6 +208,14 @@ struct EICCommand: AsyncParsableCommand {
     guard let port = EICSocket.readPort() else {
       throw EICError.serverNotReachable
     }
+    ServerLauncher.debug("Connecting to gRPC server on port \(port)")
+    return try await Self.withGRPCClient(port: port, body)
+  }
+
+  private static func withGRPCClient<T: Sendable>(
+    port: Int,
+    _ body: @Sendable @escaping (Eic_V1_EditorService.Client<GRPCNIOTransportHTTP2.HTTP2ClientTransport.Posix>) async throws -> T
+  ) async throws -> T {
     let transport = try HTTP2ClientTransport.Posix(
       target: .ipv4(host: "127.0.0.1", port: port),
       transportSecurity: .plaintext
