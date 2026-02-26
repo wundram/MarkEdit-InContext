@@ -149,7 +149,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "cd \"$SRCROOT/EICClient\"\nif [ \"$CONFIGURATION\" = \"Release\" ]; then\n  swift build -c release --arch arm64 --arch x86_64 2>&1\n  cp .build/apple/Products/Release/eic \"$BUILT_PRODUCTS_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/eic\"\nelse\n  swift build 2>&1\n  cp .build/debug/eic \"$BUILT_PRODUCTS_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/eic\"\nfi\n";
+			shellScript = "cd \"$SRCROOT/EICClient\"\nif [ \"$CONFIGURATION\" = \"Release\" ]; then\n  swift build -c release --arch arm64 2>&1\n  swift build -c release --arch x86_64 2>&1\n  lipo -create .build/arm64-apple-macosx/release/eic .build/x86_64-apple-macosx/release/eic -output .build/eic-universal\n  cp .build/eic-universal \"$BUILT_PRODUCTS_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/eic\"\nelse\n  swift build 2>&1\n  cp .build/debug/eic \"$BUILT_PRODUCTS_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/eic\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
