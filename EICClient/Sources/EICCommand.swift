@@ -3,6 +3,7 @@ import Foundation
 import GRPCCore
 import GRPCNIOTransportHTTP2
 import EICShared
+import proc_context
 
 @main
 struct EICCommand: AsyncParsableCommand {
@@ -100,16 +101,19 @@ struct EICCommand: AsyncParsableCommand {
       absolutePath = url.standardizedFileURL.path
     }
 
-    // Auto-title: git context → basename → stdin
+    // Auto-title phase 1: explicit flag, git context, pipe context
     var resolvedTitle = title
     if resolvedTitle == nil, let absolutePath {
       resolvedTitle = GitAutoTitle.detect(filePath: absolutePath)
     }
-    if resolvedTitle == nil, let absolutePath {
-      resolvedTitle = URL(fileURLWithPath: absolutePath).lastPathComponent
-    }
-    if resolvedTitle == nil && stdinPiped {
-      resolvedTitle = "stdin"
+    if resolvedTitle == nil, let ctx = proc_context_get() {
+      if ctx.pointee.stdin_is_pipe != 0 || ctx.pointee.stdout_is_pipe != 0 {
+        let procTitle = String(cString: ctx.pointee.title)
+        if !procTitle.isEmpty {
+          resolvedTitle = procTitle
+          ServerLauncher.debug("proc_context title: \(procTitle)")
+        }
+      }
     }
 
     // Read stdin if piped
@@ -129,6 +133,17 @@ struct EICCommand: AsyncParsableCommand {
       }
     } else if let absolutePath, FileManager.default.fileExists(atPath: absolutePath) {
       initialContent = (try? String(contentsOfFile: absolutePath, encoding: .utf8)) ?? ""
+    }
+
+    // Auto-title phase 2: content heading, then basename/stdin fallbacks
+    if resolvedTitle == nil {
+      resolvedTitle = contentHeading(initialContent)
+    }
+    if resolvedTitle == nil, let absolutePath {
+      resolvedTitle = URL(fileURLWithPath: absolutePath).lastPathComponent
+    }
+    if resolvedTitle == nil && stdinPiped {
+      resolvedTitle = "stdin"
     }
 
     // Ensure server is running
@@ -185,6 +200,23 @@ struct EICCommand: AsyncParsableCommand {
     case .UNRECOGNIZED, .unspecified:
       break
     }
+  }
+
+  private func contentHeading(_ content: String) -> String? {
+    guard let newline = content.firstIndex(of: "\n") else {
+      return headingText(from: content)
+    }
+    return headingText(from: content[content.startIndex..<newline])
+  }
+
+  private func headingText(from line: some StringProtocol) -> String? {
+    guard line.hasPrefix("#") else { return nil }
+    let stripped = line.drop(while: { $0 == "#" }).trimmingCharacters(in: .whitespaces)
+    guard !stripped.isEmpty else { return nil }
+    if stripped.count > 80 {
+      return String(stripped.prefix(77)) + "…"
+    }
+    return stripped
   }
 
   private func readStdin() -> String {
