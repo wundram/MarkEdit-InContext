@@ -44,7 +44,7 @@ struct EICCommand: AsyncParsableCommand {
 
     // --version: show client and server versions
     if version {
-      print("eic 0.2.0 (client)")
+      print("eic 0.3.0 (client)")
       if let port = EICSocket.readPort() {
         do {
           let serverVersion: String = try await Self.withGRPCClient(port: port) { client in
