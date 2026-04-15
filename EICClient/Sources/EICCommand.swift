@@ -3,7 +3,14 @@ import Foundation
 import GRPCCore
 import GRPCNIOTransportHTTP2
 import EICShared
+#if canImport(proc_context)
 import proc_context
+#endif
+#if canImport(Darwin)
+import Darwin
+#elseif canImport(Glibc)
+import Glibc
+#endif
 
 @main
 struct EICCommand: AsyncParsableCommand {
@@ -14,6 +21,9 @@ struct EICCommand: AsyncParsableCommand {
 
   @Option(name: .long, help: "Set the window title")
   var title: String?
+
+  @Option(name: .long, help: "Override hostname shown in the editor window (defaults to $EIC_CLIENT_NAME or $HOSTNAME)")
+  var name: String?
 
   @Flag(name: .shortAndLong, help: "Show debug output on stderr")
   var verbose = false
@@ -106,6 +116,7 @@ struct EICCommand: AsyncParsableCommand {
     if resolvedTitle == nil, let absolutePath {
       resolvedTitle = GitAutoTitle.detect(filePath: absolutePath)
     }
+    #if canImport(proc_context)
     if resolvedTitle == nil, let ctx = proc_context_get() {
       if ctx.pointee.stdin_is_pipe != 0 || ctx.pointee.stdout_is_pipe != 0 {
         let procTitle = String(cString: ctx.pointee.title)
@@ -115,6 +126,7 @@ struct EICCommand: AsyncParsableCommand {
         }
       }
     }
+    #endif
 
     // Read stdin if piped
     var stdinContent: String?
@@ -149,6 +161,28 @@ struct EICCommand: AsyncParsableCommand {
     // Ensure server is running
     try await ServerLauncher.ensureServerRunning()
 
+    // Client identity — for the editor window's remote-session UI.
+    let env = ProcessInfo.processInfo.environment
+    let isRemote = env["EIC_PORT"] != nil || env["SSH_CONNECTION"] != nil || env["SSH_CLIENT"] != nil
+    let resolvedHostname: String = {
+      if let name, !name.isEmpty { return name }
+      if let n = env["EIC_CLIENT_NAME"], !n.isEmpty { return n }
+      var buf = [CChar](repeating: 0, count: 256)
+      if gethostname(&buf, buf.count) == 0 {
+        return String(cString: buf)
+      }
+      return env["HOSTNAME"] ?? ""
+    }()
+    let resolvedUser: String = {
+      if let sudoUser = env["SUDO_USER"], !sudoUser.isEmpty { return sudoUser }
+      if let u = env["USER"], !u.isEmpty { return u }
+      if let u = env["LOGNAME"], !u.isEmpty { return u }
+      if let pw = getpwuid(geteuid())?.pointee.pw_name {
+        return String(cString: pw)
+      }
+      return ""
+    }()
+
     // Build the edit request — content goes via gRPC, no file path needed by the app
     let request: Eic_V1_EditRequest = {
       var r = Eic_V1_EditRequest()
@@ -158,7 +192,10 @@ struct EICCommand: AsyncParsableCommand {
       r.noSave = noSave
       r.detach = detach
       r.stdoutPiped = stdoutPiped
-      r.sudo = ProcessInfo.processInfo.environment["SUDO_USER"] != nil || geteuid() == 0
+      r.sudo = env["SUDO_USER"] != nil || geteuid() == 0
+      r.clientHostname = resolvedHostname
+      r.clientUser = resolvedUser
+      r.clientIsRemote = isRemote
       return r
     }()
 
@@ -237,6 +274,12 @@ struct EICCommand: AsyncParsableCommand {
   private func withClient<T: Sendable>(
     _ body: @Sendable @escaping (Eic_V1_EditorService.Client<GRPCNIOTransportHTTP2.HTTP2ClientTransport.Posix>) async throws -> T
   ) async throws -> T {
+    // Prefer an explicit port from the environment — needed for remote (SSH-tunneled) sessions
+    // where the port file on the Mac server isn't visible on the client host.
+    if let override = ProcessInfo.processInfo.environment["EIC_PORT"], let port = Int(override), port > 0 {
+      ServerLauncher.debug("Connecting to gRPC server on EIC_PORT=\(port)")
+      return try await Self.withGRPCClient(port: port, body)
+    }
     guard let port = EICSocket.readPort() else {
       throw EICError.serverNotReachable
     }

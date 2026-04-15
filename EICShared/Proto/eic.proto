@@ -16,6 +16,12 @@ message EditRequest {
   bool detach = 5;
   bool stdout_piped = 6;
   bool sudo = 7;
+
+  // Identity of the client — used to display remote-session context in
+  // the editor window. Empty client_hostname means local session.
+  string client_hostname = 8;
+  string client_user = 9;
+  bool client_is_remote = 10;
 }
 
 message EditResponse {

@@ -1,11 +1,34 @@
 import Foundation
 import EICShared
+#if canImport(Darwin)
+import Darwin
+#elseif canImport(Glibc)
+import Glibc
+#endif
 
 enum ServerLauncher {
   static let appName = "MarkEdit InContext"
   nonisolated(unsafe) static var verbose = false
 
   static func ensureServerRunning() async throws {
+    // Remote mode: an EIC_PORT env var means the user has set up a forwarding tunnel.
+    // We can't auto-launch the Mac app from the remote side — just verify reachability.
+    if let override = ProcessInfo.processInfo.environment["EIC_PORT"], let port = Int(override), port > 0 {
+      debug("Remote mode: using EIC_PORT=\(port)")
+      if isPortOpen(port) {
+        return
+      }
+      FileHandle.standardError.write(Data("""
+        eic: cannot reach \(appName) at 127.0.0.1:\(port).
+        Start the app on your Mac and ensure your SSH tunnel forwards that port, e.g.:
+          ssh -R \(port):127.0.0.1:\(port) <remote-host>
+        (the Mac's current port is in ~/.eic/eic.port)
+
+        """.utf8))
+      throw EICError.serverNotReachable
+    }
+
+    #if os(macOS)
     // If a port file exists, check if the server is actually reachable
     debug("Checking port file: \(EICSocket.portFilePath)")
     if let port = EICSocket.readPort() {
@@ -41,6 +64,14 @@ enum ServerLauncher {
 
     debug("Server failed to start after 5s")
     throw EICError.serverNotReachable
+    #else
+    FileHandle.standardError.write(Data("""
+      eic: no $EIC_PORT set and this host can't launch \(appName) directly.
+      Set EIC_PORT to the forwarded port of the Mac running \(appName).
+
+      """.utf8))
+    throw EICError.serverNotReachable
+    #endif
   }
 
   static func resolveAppPath() -> String {

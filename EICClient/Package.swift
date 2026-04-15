@@ -8,6 +8,7 @@ let package = Package(
     .package(path: "../EICShared"),
     .package(url: "https://github.com/grpc/grpc-swift-nio-transport.git", from: "1.0.0"),
     .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.3.0"),
+    // proc_context uses Darwin-only libproc APIs; skip on Linux.
     .package(url: "https://github.com/wundram/proc_context.git", branch: "main"),
   ],
   targets: [
@@ -17,7 +18,7 @@ let package = Package(
         "EICShared",
         .product(name: "GRPCNIOTransportHTTP2", package: "grpc-swift-nio-transport"),
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
-        .product(name: "proc_context", package: "proc_context"),
+        .product(name: "proc_context", package: "proc_context", condition: .when(platforms: [.macOS])),
       ],
       path: "Sources"
     ),

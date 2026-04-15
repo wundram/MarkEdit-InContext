@@ -29,7 +29,7 @@ public enum Eic_V1_EditorService: Sendable {
             /// Descriptor for "Edit".
             public static let descriptor = GRPCCore.MethodDescriptor(
                 service: GRPCCore.ServiceDescriptor(fullyQualifiedService: "eic.v1.EditorService"),
-                method: "Edit"
+                method: "Edit",
             )
         }
         /// Namespace for "OpenSettings" metadata.
@@ -41,7 +41,7 @@ public enum Eic_V1_EditorService: Sendable {
             /// Descriptor for "OpenSettings".
             public static let descriptor = GRPCCore.MethodDescriptor(
                 service: GRPCCore.ServiceDescriptor(fullyQualifiedService: "eic.v1.EditorService"),
-                method: "OpenSettings"
+                method: "OpenSettings",
             )
         }
         /// Namespace for "Quit" metadata.
@@ -53,7 +53,7 @@ public enum Eic_V1_EditorService: Sendable {
             /// Descriptor for "Quit".
             public static let descriptor = GRPCCore.MethodDescriptor(
                 service: GRPCCore.ServiceDescriptor(fullyQualifiedService: "eic.v1.EditorService"),
-                method: "Quit"
+                method: "Quit",
             )
         }
         /// Namespace for "Ping" metadata.
@@ -65,7 +65,7 @@ public enum Eic_V1_EditorService: Sendable {
             /// Descriptor for "Ping".
             public static let descriptor = GRPCCore.MethodDescriptor(
                 service: GRPCCore.ServiceDescriptor(fullyQualifiedService: "eic.v1.EditorService"),
-                method: "Ping"
+                method: "Ping",
             )
         }
         /// Descriptors for all methods in the "eic.v1.EditorService" service.

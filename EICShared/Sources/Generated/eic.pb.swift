@@ -39,6 +39,14 @@ public struct Eic_V1_EditRequest: Sendable {
 
   public var sudo: Bool = false
 
+  /// Identity of the client — used to display remote-session context in
+  /// the editor window. Empty client_hostname means local session.
+  public var clientHostname: String = String()
+
+  public var clientUser: String = String()
+
+  public var clientIsRemote: Bool = false
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -174,7 +182,7 @@ fileprivate let _protobuf_package = "eic.v1"
 
 extension Eic_V1_EditRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".EditRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}file_path\0\u{1}title\0\u{3}initial_content\0\u{3}no_save\0\u{1}detach\0\u{3}stdout_piped\0\u{1}sudo\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}file_path\0\u{1}title\0\u{3}initial_content\0\u{3}no_save\0\u{1}detach\0\u{3}stdout_piped\0\u{1}sudo\0\u{3}client_hostname\0\u{3}client_user\0\u{3}client_is_remote\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -189,6 +197,9 @@ extension Eic_V1_EditRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
       case 5: try { try decoder.decodeSingularBoolField(value: &self.detach) }()
       case 6: try { try decoder.decodeSingularBoolField(value: &self.stdoutPiped) }()
       case 7: try { try decoder.decodeSingularBoolField(value: &self.sudo) }()
+      case 8: try { try decoder.decodeSingularStringField(value: &self.clientHostname) }()
+      case 9: try { try decoder.decodeSingularStringField(value: &self.clientUser) }()
+      case 10: try { try decoder.decodeSingularBoolField(value: &self.clientIsRemote) }()
       default: break
       }
     }
@@ -216,6 +227,15 @@ extension Eic_V1_EditRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
     if self.sudo != false {
       try visitor.visitSingularBoolField(value: self.sudo, fieldNumber: 7)
     }
+    if !self.clientHostname.isEmpty {
+      try visitor.visitSingularStringField(value: self.clientHostname, fieldNumber: 8)
+    }
+    if !self.clientUser.isEmpty {
+      try visitor.visitSingularStringField(value: self.clientUser, fieldNumber: 9)
+    }
+    if self.clientIsRemote != false {
+      try visitor.visitSingularBoolField(value: self.clientIsRemote, fieldNumber: 10)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -227,6 +247,9 @@ extension Eic_V1_EditRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
     if lhs.detach != rhs.detach {return false}
     if lhs.stdoutPiped != rhs.stdoutPiped {return false}
     if lhs.sudo != rhs.sudo {return false}
+    if lhs.clientHostname != rhs.clientHostname {return false}
+    if lhs.clientUser != rhs.clientUser {return false}
+    if lhs.clientIsRemote != rhs.clientIsRemote {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

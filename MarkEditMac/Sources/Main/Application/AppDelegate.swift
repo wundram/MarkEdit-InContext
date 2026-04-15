@@ -172,6 +172,9 @@ extension AppDelegate {
     document.sessionIsOutputMode = request.stdoutPiped || request.noSave
     document.sessionIsDetached = request.detach
     document.sessionIsSudo = request.sudo
+    document.sessionIsRemote = request.clientIsRemote
+    document.sessionClientHostname = request.clientHostname.isEmpty ? nil : request.clientHostname
+    document.sessionClientUser = request.clientUser.isEmpty ? nil : request.clientUser
     NSDocumentController.shared.addDocument(document)
     document.makeWindowControllers()
     document.showWindows()

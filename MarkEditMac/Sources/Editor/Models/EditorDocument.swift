@@ -32,6 +32,9 @@ final class EditorDocument: NSDocument {
   var sessionIsOutputMode = false
   var sessionIsDetached = false
   var sessionIsSudo = false
+  var sessionIsRemote = false
+  var sessionClientHostname: String?
+  var sessionClientUser: String?
 
   var canUndo: Bool {
     get async {
@@ -130,6 +133,15 @@ final class EditorDocument: NSDocument {
       accessory.view = bar
       accessory.layoutAttribute = .bottom
       window.addTitlebarAccessoryViewController(accessory)
+    }
+
+    // Remote sessions show the connecting user@host in the window subtitle
+    // so it's obvious which machine the edit is operating on.
+    if sessionIsRemote, let window = windowController.window {
+      let user = sessionClientUser ?? "?"
+      let host = sessionClientHostname ?? "?"
+      let suffix = sessionIsSudo ? " (sudo)" : ""
+      window.subtitle = "\(user)@\(host)\(suffix)"
     }
 
     #if DEBUG
