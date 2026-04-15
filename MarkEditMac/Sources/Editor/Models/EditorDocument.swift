@@ -71,6 +71,7 @@ final class EditorDocument: NSDocument {
     false // MarkEdit InContext: no auto-save
   }
 
+  private var autosaveDelayedTask: Task<Void, Never>?
   private var textBundle: TextBundleWrapper?
   private var revertedDate: Date = .distantPast
   private var suggestedTextEncoding: EditorTextEncoding?
@@ -171,6 +172,16 @@ final class EditorDocument: NSDocument {
         if userInitiated {
           markContentClean()
         }
+      }
+    }
+  }
+
+  func autosaveDelayed(seconds: Double = 0.25) {
+    autosaveDelayedTask?.cancel()
+    autosaveDelayedTask = Task { [weak self] in
+      try? await Task.sleep(for: .seconds(seconds))
+      if !Task.isCancelled {
+        try? await self?.autosave(withImplicitCancellability: false)
       }
     }
   }

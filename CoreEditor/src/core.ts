@@ -2,13 +2,13 @@ import { EditorView } from '@codemirror/view';
 import { EditorSelection } from '@codemirror/state';
 import { extensions } from './extensions';
 import { globalState, editingState } from './common/store';
-import { almostEqual, afterDomUpdate, getViewportScale, isReleaseMode } from './common/utils';
+import { almostEqual, afterDomUpdate, getViewportScale, isReleaseMode, isMotionReduced } from './common/utils';
 
 import hasSelection from './modules/selection/hasSelection';
 import replaceSelections from './modules/commands/replaceSelections';
 
 import { resetKeyStates } from './modules/events';
-import { setUp, setGutterHovered } from './styling/config';
+import { setUp, setGutterHovered, applyReducedMotion } from './styling/config';
 import { notifyBackgroundColor } from './styling/helper';
 import { loadTheme } from './styling/themes';
 import { recalculateTextMetrics } from './modules/config';
@@ -17,6 +17,7 @@ import { getLineBreak, normalizeLineBreaks } from './modules/lineEndings';
 import { removeFrontMatter } from './modules/frontMatter';
 import { selectedMainText, scrollIntoView } from './modules/selection';
 import { markContentClean } from './modules/history';
+import { updateTextChecker } from './modules/textChecker';
 
 import { TextEditor } from './api/editor';
 import { editorReadyListeners } from './api/methods';
@@ -62,8 +63,8 @@ export function resetEditor(initialContent: string) {
   // Idle state change should always go first
   editingState.isIdle = false;
 
-  // eslint-disable-next-line
-  if (window.editor && window.editor.destroy) {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  if (typeof window.editor?.destroy === 'function') {
     window.editor.destroy();
   }
 
@@ -96,13 +97,18 @@ export function resetEditor(initialContent: string) {
   // Ensure twice, the first one is for initial launch,
   // the latter is for a special case where the window moves to the background during launch.
   ensureLineHeight();
-  setTimeout(ensureLineHeight, 600);
+  setTimeout(ensureLineHeight, 1000);
 
   // Makes sure the content doesn't have unwanted inset
   scrollIntoView(0, window.config.typewriterMode ? 'center' : undefined);
 
   const contentDOM = editor.contentDOM;
   contentDOM.addEventListener('blur', handleFocusLost);
+
+  updateTextChecker(contentDOM, {
+    spellcheck: true,
+    autocorrect: true,
+  });
 
   const scrollDOM = editor.scrollDOM;
   scrollDOM.scrollTo({ top: 0 }); // scrollIntoView doesn't work when the app is idle
@@ -129,10 +135,11 @@ export function resetEditor(initialContent: string) {
 
   // Recofigure, window.config might have changed
   setUp(window.config, loadTheme(window.config.theme).colors);
+  applyReducedMotion(isMotionReduced());
   observeBackgroundColorChanges(editor.dom);
   afterDomUpdate(notifyBackgroundColor);
 
-  // eslint-disable-next-line compat/compat
+  // Recalculate text metrics to update the max height of autocomplete
   requestAnimationFrame(() => recalculateTextMetrics());
 
   // After calling editor.focus(), the selection is set to [Ln 1, Col 1]
@@ -259,7 +266,6 @@ function observeContentHeightChanges(scrollDOM: HTMLElement) {
     });
   };
 
-  // eslint-disable-next-line compat/compat
   const observer = new ResizeObserver(notifyIfChanged);
   observer.observe(scrollDOM);
   notifyIfChanged();

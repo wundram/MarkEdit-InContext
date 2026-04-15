@@ -47,4 +47,21 @@ final class AppDocumentController: NSDocumentController {
   override func openDocument(_ sender: Any?) {
     // No-op: single-file editor
   }
+
+  override func openDocument(
+    withContentsOf url: URL,
+    display displayDocument: Bool,
+    completionHandler: @escaping (NSDocument?, Bool, (any Error)?) -> Void
+  ) {
+    Task { @MainActor in
+      // Ensure the reuse pool has a fully loaded editor before opening the document
+      await EditorReusePool.shared.prepareViewController()
+
+      super.openDocument(
+        withContentsOf: url,
+        display: displayDocument,
+        completionHandler: completionHandler
+      )
+    }
+  }
 }

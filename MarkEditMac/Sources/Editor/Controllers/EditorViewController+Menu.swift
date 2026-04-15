@@ -12,7 +12,7 @@ import FontPicker
 // MARK: - NSMenu Creation
 
 extension EditorViewController {
-  var searchOperationsMenuItem: NSMenuItem? {
+  var searchActionsMenuItem: NSMenuItem? {
     guard findPanel.mode != .hidden else {
       return nil
     }
@@ -39,7 +39,7 @@ extension EditorViewController {
       self?.performSearchOperation(.replaceAllInSelection)
     }.isEnabled = canReplace
 
-    let item = NSMenuItem(title: Localized.Search.searchOperations)
+    let item = NSMenuItem(title: Localized.Search.searchActions)
     item.tag = WKContextMenuItemTag.searchMenu.rawValue
     item.submenu = menu
     return item
@@ -154,8 +154,12 @@ extension EditorViewController: NSMenuItemValidation {
 
 extension EditorViewController {
   @IBAction func terminate(_ sender: Any?) {
-    document?.isTerminating = true
-    NSApplication.shared.terminate(sender)
+    // MarkEdit InContext: window restoration disabled; terminate directly
+    NSDocumentController.shared.editorDocuments.forEach {
+      $0.isTerminating = true
+    }
+
+    NSApp.terminate(sender)
   }
 
   @objc func copyAll(_ sender: Any?) {

@@ -5,7 +5,7 @@
 //  Created by cyan on 8/9/24.
 //
 
-import Foundation
+import AppKit
 import MarkEditCore
 import MarkEditKit
 
@@ -19,7 +19,20 @@ enum AppRuntimeConfig {
       case blur = "blur"
     }
 
+    enum UpdateBehavior: String, Codable {
+      case quiet = "quiet"
+      case notify = "notify"
+      case never = "never"
+    }
+
+    struct HotKey: Codable {
+      let key: String
+      let modifiers: [String]
+    }
+
     let autoCharacterPairs: Bool?
+    let autoSaveWhenIdle: Bool?
+    let closeAlwaysConfirmsChanges: Bool?
     let indentBehavior: EditorIndentBehavior?
     let writingToolsBehavior: String?
     let headerFontSizeDiffs: [Double]?
@@ -30,11 +43,19 @@ enum AppRuntimeConfig {
     let customToolbarItems: [CustomToolbarItem]?
     let useClassicInterface: Bool?
     let visualEffectType: VisualEffectType?
+    let updateBehavior: UpdateBehavior?
+    let checksForUpdates: Bool? // [Deprecated] Kept for backward compatibility
+    let defaultOpenDirectory: String?
     let defaultSaveDirectory: String?
+    let disableOpenPanelOptions: Bool?
     let disableCorsRestrictions: Bool?
+    let preferredTerminalApp: String?
+    let mainWindowHotKey: HotKey?
 
     enum CodingKeys: String, CodingKey {
       case autoCharacterPairs = "editor.autoCharacterPairs"
+      case autoSaveWhenIdle = "editor.autoSaveWhenIdle"
+      case closeAlwaysConfirmsChanges = "editor.closeAlwaysConfirmsChanges"
       case indentBehavior = "editor.indentBehavior"
       case writingToolsBehavior = "editor.writingToolsBehavior"
       case headerFontSizeDiffs = "editor.headerFontSizeDiffs"
@@ -45,15 +66,21 @@ enum AppRuntimeConfig {
       case customToolbarItems = "editor.customToolbarItems"
       case useClassicInterface = "general.useClassicInterface"
       case visualEffectType = "general.visualEffectType"
+      case updateBehavior = "general.updateBehavior"
+      case checksForUpdates = "general.checksForUpdates"
+      case defaultOpenDirectory = "general.defaultOpenDirectory"
       case defaultSaveDirectory = "general.defaultSaveDirectory"
+      case disableOpenPanelOptions = "general.disableOpenPanelOptions"
       case disableCorsRestrictions = "general.disableCorsRestrictions"
+      case preferredTerminalApp = "general.preferredTerminalApp"
+      case mainWindowHotKey = "general.mainWindowHotKey"
     }
   }
 
   static let jsonLiteral: String = {
     {
       guard let fileData, (try? JSONSerialization.jsonObject(with: fileData, options: [])) != nil else {
-        Logger.assertFail("Invalid json file was found at: \(AppCustomization.settings.fileURL)")
+        Logger.log(.error, "Invalid json file was found at: \(AppCustomization.settings.fileURL)")
         return nil
       }
 
@@ -72,6 +99,20 @@ enum AppRuntimeConfig {
   static var autoCharacterPairs: Bool {
     // Enable auto character pairs by default
     currentDefinition?.autoCharacterPairs ?? true
+  }
+
+  static var autoSaveWhenIdle: Bool {
+    if closeAlwaysConfirmsChanges == true {
+      // If changes require confirmation, they are not saved periodically
+      return false
+    }
+
+    return currentDefinition?.autoSaveWhenIdle ?? false
+  }
+
+  static var closeAlwaysConfirmsChanges: Bool? {
+    // Changes are saved automatically by default
+    currentDefinition?.closeAlwaysConfirmsChanges
   }
 
   static var indentBehavior: EditorIndentBehavior {
@@ -121,14 +162,41 @@ enum AppRuntimeConfig {
     currentDefinition?.visualEffectType ?? .glass
   }
 
+  static var updateBehavior: Definition.UpdateBehavior {
+    guard currentDefinition?.checksForUpdates ?? true else {
+      return .never
+    }
+
+    return currentDefinition?.updateBehavior ?? .quiet
+  }
+
+  static var defaultOpenDirectory: String? {
+    // Unspecified by default
+    currentDefinition?.defaultOpenDirectory
+  }
+
   static var defaultSaveDirectory: String? {
     // Unspecified by default
     currentDefinition?.defaultSaveDirectory
   }
 
+  static var disableOpenPanelOptions: Bool {
+    currentDefinition?.disableOpenPanelOptions ?? defaultDisableOpenPanelOptions
+  }
+
   static var disableCorsRestrictions: Bool {
     // Enforce CORS restrictions by default
     currentDefinition?.disableCorsRestrictions ?? false
+  }
+
+  static var preferredTerminalApp: String? {
+    // Use auto-detection by default
+    currentDefinition?.preferredTerminalApp
+  }
+
+  static var mainWindowHotKey: Definition.HotKey? {
+    // Shift-Command-Option-M by default
+    currentDefinition?.mainWindowHotKey
   }
 
   static var defaultContents: String {
@@ -165,6 +233,8 @@ private extension AppRuntimeConfig {
 
   static let defaultDefinition = Definition(
     autoCharacterPairs: true,
+    autoSaveWhenIdle: false,
+    closeAlwaysConfirmsChanges: nil,
     indentBehavior: .never,
     writingToolsBehavior: nil, // [macOS 15] Complete mode still has lots of bugs
     headerFontSizeDiffs: nil,
@@ -175,18 +245,24 @@ private extension AppRuntimeConfig {
     customToolbarItems: [],
     useClassicInterface: nil,
     visualEffectType: nil,
+    updateBehavior: .quiet,
+    checksForUpdates: nil,
+    defaultOpenDirectory: nil,
     defaultSaveDirectory: nil,
-    disableCorsRestrictions: nil
+    disableOpenPanelOptions: defaultDisableOpenPanelOptions,
+    disableCorsRestrictions: nil,
+    preferredTerminalApp: nil,
+    mainWindowHotKey: .init(key: "M", modifiers: ["Shift", "Command", "Option"])
   )
 
   static let currentDefinition: Definition? = {
     guard let fileData else {
-      Logger.assertFail("Missing settings.json to proceed")
+      Logger.log(.error, "Missing settings.json to proceed")
       return nil
     }
 
     guard let definition = try? JSONDecoder().decode(Definition.self, from: fileData) else {
-      Logger.assertFail("Invalid json object was found: \(fileData)")
+      Logger.log(.error, "Invalid json object was found: \(fileData)")
       return nil
     }
 
@@ -201,5 +277,14 @@ private extension AppRuntimeConfig {
     Logger.assert(jsonData != nil, "Failed to encode object: \(definition)")
 
     return jsonData
+  }
+
+  static var defaultDisableOpenPanelOptions: Bool {
+    // [macOS 26] Revisit this later, NSOpenPanel.accessoryView can significantly slow down the file opening process
+    if #available(macOS 26.0, *) {
+      return true
+    }
+
+    return false
   }
 }

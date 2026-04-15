@@ -16,7 +16,7 @@ extension AppDelegate {
   }
 
   var currentEditor: EditorViewController? {
-    (NSApp as? Application)?.currentEditor
+    NSApp.currentEditor
   }
 
   func applicationShouldOpenUntitledFile(_ sender: NSApplication) -> Bool {

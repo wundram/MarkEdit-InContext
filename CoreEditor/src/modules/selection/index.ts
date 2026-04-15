@@ -20,7 +20,7 @@ type ScrollStrategy = 'nearest' | 'start' | 'end' | 'center';
  * Reverse ranges for multi-selection to keep indices correct when updating.
  */
 export function reversedRanges() {
-  return selectedRanges().reverse();
+  return selectedRanges().toReversed();
 }
 
 /**
@@ -90,7 +90,7 @@ export function selectWholeLineIfNeeded(event: MouseEvent) {
   }) as HTMLElement | undefined;
 
   if (actualElement !== undefined) {
-    selectWholeLineAt(parseInt(actualElement.innerText));
+    selectWholeLineAt(Number(actualElement.textContent));
   }
 }
 

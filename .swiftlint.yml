@@ -5,6 +5,7 @@ excluded:
   - EICShared/Sources/Generated
   - EICClient/Sources
   - EICServer/Sources
+  - MarkEditMac/Modules/.build
 
 disabled_rules:
 

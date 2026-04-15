@@ -22,7 +22,7 @@ enum EditorFindMode {
 protocol EditorFindPanelDelegate: AnyObject {
   func editorFindPanel(_ sender: EditorFindPanel, modeDidChange mode: EditorFindMode)
   func editorFindPanel(_ sender: EditorFindPanel, searchTermDidChange searchTerm: String)
-  func editorFindPanelOperationsMenuItem(_ sender: EditorFindPanel) -> NSMenuItem?
+  func editorFindPanelActionsMenuItem(_ sender: EditorFindPanel) -> NSMenuItem?
   func editorFindPanelDidChangeOptions(_ sender: EditorFindPanel)
   func editorFindPanelDidPressTabKey(_ sender: EditorFindPanel, isBacktab: Bool)
   func editorFindPanelDidClickNext(_ sender: EditorFindPanel)
@@ -51,7 +51,7 @@ final class EditorFindPanel: EditorPanelView {
 
   private(set) lazy var doneButton = {
     let button = AquaFocusRingButton()
-    button.bezelStyle = .accessoryBarAction
+    button.bezelStyle = AppDesign.modernStyle ? .accessoryBar : .accessoryBarAction
 
     button.attributedTitle = NSAttributedString(
       string: Localized.General.done,

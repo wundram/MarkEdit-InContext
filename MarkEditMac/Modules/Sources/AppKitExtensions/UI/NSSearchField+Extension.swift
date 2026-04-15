@@ -8,8 +8,27 @@ import AppKit
 
 public extension NSSearchField {
   var clipView: NSView? {
-    // _NSKeyboardFocusClipView
-    subviews.first { $0.className.hasSuffix("FocusClipView") }
+    // [macOS 26] Revisit this later (#1281)
+    for view in subviews where view.className.hasSuffix("FocusClipView") {
+      // _NSKeyboardFocusClipView
+      return view
+    }
+
+    return nil
+  }
+
+  var modernBezelView: NSView? {
+    firstDescendant {
+      $0.className.contains("AppKitSearchField")
+    }
+  }
+
+  var searchButtonCell: NSButtonCell? {
+    (cell as? NSSearchFieldCell)?.searchButtonCell
+  }
+
+  var cancelButtonCell: NSButtonCell? {
+    (cell as? NSSearchFieldCell)?.cancelButtonCell
   }
 
   func addToRecents(searchTerm: String) {
@@ -19,23 +38,5 @@ public extension NSSearchField {
 
     let recents = recentSearches.filter { $0 != searchTerm }
     recentSearches = [searchTerm] + recents
-  }
-
-  func setIconTintColor(_ tintColor: NSColor?) {
-    guard let buttonCell = (cell as? NSSearchFieldCell)?.searchButtonCell else {
-      return
-    }
-
-    guard let iconImage = buttonCell.image else {
-      return
-    }
-
-    guard iconImage.responds(to: sel_getUid("_setTintColor:")) else {
-      return
-    }
-
-    iconImage.perform(sel_getUid("_setTintColor:"), with: tintColor)
-    buttonCell.image = iconImage
-    needsDisplay = true
   }
 }

@@ -45,6 +45,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, EICServiceDelegate {
   private var settingsWindowController: NSWindowController?
   private(set) var serverManager: EICServerManager?
 
+  func applicationWillFinishLaunching(_ notification: Notification) {
+    EditorReusePool.shared.warmUp()
+  }
+
   func applicationDidFinishLaunching(_ notification: Notification) {
     NSApp.appearance = AppPreferences.General.appearance.resolved()
     appearanceObservation = NSApp.observe(\.effectiveAppearance) { _, _ in
@@ -60,8 +64,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, EICServiceDelegate {
       object: nil
     )
 
-    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-      EditorReusePool.shared.warmUp()
+    // App level setting for "Ask to keep changes when closing documents"
+    if let closeAlwaysConfirmsChanges = AppRuntimeConfig.closeAlwaysConfirmsChanges {
+      UserDefaults.standard.set(closeAlwaysConfirmsChanges, forKey: NSCloseAlwaysConfirmsChanges)
+    } else {
+      UserDefaults.standard.removeObject(forKey: NSCloseAlwaysConfirmsChanges)
     }
 
     // Update menu item title based on launch context
@@ -211,5 +218,9 @@ private extension AppDelegate {
     } else {
       settingsWindowController?.showWindow(self)
     }
+  }
+
+  @IBAction func openSettingsJSON(_ sender: Any?) {
+    NSWorkspace.shared.open(AppCustomization.settings.fileURL)
   }
 }

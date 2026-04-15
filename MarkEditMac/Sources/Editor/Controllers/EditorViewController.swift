@@ -13,7 +13,13 @@ import Statistics
 import TextCompletion
 
 final class EditorViewController: NSViewController {
-  var hasFinishedLoading = false
+  var hasFinishedLoading = false {
+    didSet {
+      loadingContinuations.forEach { $0.resume() }
+      loadingContinuations.removeAll()
+    }
+  }
+
   var hasUnfinishedAnimations = false
   var hasBeenEdited = false
   var mouseExitedWindow = false
@@ -107,18 +113,6 @@ final class EditorViewController: NSViewController {
 
   private(set) lazy var panelDivider = {
     DividerView()
-  }()
-
-  private(set) lazy var loadingIndicator: NSView = {
-    class View: NSImageView {
-      override func hitTest(_ point: NSPoint) -> NSView? { nil }
-    }
-
-    let view = View()
-    view.image = NSImage(named: "AppIcon")
-
-    Logger.assert(view.image != nil, "Missing AppIcon from the main bundle")
-    return view
   }()
 
   private(set) lazy var statusView = {
@@ -232,6 +226,9 @@ final class EditorViewController: NSViewController {
     }
   }()
 
+  // For CoreEditor preload
+  private var loadingContinuations = [CheckedContinuation<Void, Never>]()
+
   deinit {
     if let monitor = localEventMonitor {
       NSEvent.removeMonitor(monitor)
@@ -239,9 +236,16 @@ final class EditorViewController: NSViewController {
     }
   }
 
-  init() {
+  init(preloadDelay: TimeInterval? = nil) {
     super.init(nibName: nil, bundle: nil)
-    _ = self.webView // Pre-load
+
+    if let preloadDelay, preloadDelay > 0 {
+      DispatchQueue.main.asyncAfter(deadline: .now() + preloadDelay) { [weak self] in
+        _ = self?.webView
+      }
+    } else {
+      _ = self.webView
+    }
   }
 
   @available(*, unavailable)
@@ -266,7 +270,6 @@ final class EditorViewController: NSViewController {
 
     layoutPanels()
     layoutWebView()
-    layoutLoadingIndicator()
     layoutStatusView()
   }
 
@@ -305,6 +308,16 @@ final class EditorViewController: NSViewController {
 // MARK: - Exposed Methods
 
 extension EditorViewController {
+  func waitUntilLoaded() async {
+    if hasFinishedLoading {
+      return
+    }
+
+    await withCheckedContinuation {
+      loadingContinuations.append($0)
+    }
+  }
+
   func prepareInitialContent(_ text: String) {
     if hasFinishedLoading {
       prependTextContent(text)
@@ -330,21 +343,17 @@ extension EditorViewController {
   }
 
   func resetEditor() {
-    guard hasFinishedLoading else {
+    guard hasFinishedLoading, let textContent = document?.stringValue else {
       return
     }
 
-    bridge.core.resetEditor(text: document?.stringValue ?? "") { _ in
-      self.webView.magnification = 1.0
-      self.bridge.textChecker.update(options: TextCheckerOptions(
-        spellcheck: true,
-        autocorrect: true
-      ))
+    bridge.core.resetEditor(text: textContent) { [weak self] _ in
+      self?.webView.magnification = 1.0
 
       // Initial content from scenarios like "CreateNewDocumentIntent" or "New File from Clipboard"
-      if let text = self.initialContent {
-        self.prependTextContent(text)
-        self.initialContent = nil
+      if let text = self?.initialContent {
+        self?.prependTextContent(text)
+        self?.initialContent = nil
       }
     }
 

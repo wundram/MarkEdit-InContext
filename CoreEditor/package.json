@@ -15,6 +15,8 @@
   "dependencies": {
     "@codemirror/autocomplete": "^6.0.0",
     "@codemirror/commands": "^6.0.0",
+    "@codemirror/lang-markdown": "^6.0.0",
+    "@codemirror/lang-yaml": "^6.0.0",
     "@codemirror/language": "^6.0.0",
     "@codemirror/language-data": "^6.0.0",
     "@codemirror/search": "^6.0.0",
@@ -23,17 +25,13 @@
     "@lezer/common": "^1.0.0",
     "@lezer/highlight": "^1.0.0",
     "@lezer/lr": "^1.0.0",
-    "@lezer/markdown": "^1.0.0",
-    "js-yaml": "^4.1.1",
-    "uuid": "^10.0.0"
+    "@lezer/markdown": "^1.0.0"
   },
   "devDependencies": {
     "@eslint/plugin-kit": "^0.3.5",
     "@stylistic/eslint-plugin": "^5.5.0",
     "@types/eslint": "^9.6.1",
     "@types/jest": "^29.5.4",
-    "@types/js-yaml": "^4.0.5",
-    "@types/uuid": "^10.0.0",
     "@typescript-eslint/parser": "^8.46.2",
     "esbuild": "^0.25.0",
     "eslint": "^9.39.0",
@@ -43,14 +41,21 @@
     "jest": "^30.2.0",
     "jest-environment-jsdom": "^30.2.0",
     "markedit-api": "https://github.com/MarkEdit-app/MarkEdit-api#v0.21.0",
-    "rollup": "^4.0.0",
+    "rollup": "^4.59.0",
     "ts-gyb": "^0.12.0",
     "ts-jest": "^29.4.5",
     "tslib": "^2.6.2",
     "typescript": "^5.0.0",
     "typescript-eslint": "^8.46.2",
-    "vite": "^7.1.11",
+    "vite": "^7.3.2",
     "vite-plugin-singlefile": "^2.0.1"
   },
+  "resolutions": {
+    "minimatch": "^10.2.4",
+    "picomatch": "^4.0.4"
+  },
+  "browserslist": [
+    "safari >= 18"
+  ],
   "packageManager": "yarn@4.9.2"
 }

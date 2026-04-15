@@ -25,7 +25,6 @@ export function forceRedrawElement(element: HTMLElement) {
 }
 
 export function sleep(milliseconds: number) {
-  // eslint-disable-next-line compat/compat
   return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
 
@@ -55,4 +54,8 @@ export function getViewportScale() {
 
 export function isMetaKey(event: KeyboardEvent) {
   return event.key === 'Meta';
+}
+
+export function isMotionReduced() {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }

@@ -10,33 +10,55 @@ import AppKitExtensions
 
 @MainActor
 final class RuntimeTests: XCTestCase {
-  func testExistenceOfAppIcon() {
-    guard let bundle = (Bundle.allBundles.first { $0.bundleURL.lastPathComponent == "MarkEdit.app" }) else {
-      return XCTFail("Missing MarkEdit.app bundle to continue")
-    }
-
-    XCTAssertNotNil(bundle.image(forResource: "AppIcon"), "Missing AppIcon from the main bundle")
-  }
-
   func testExistenceOfDrawsBackground() {
     let configuration = WKWebViewConfiguration()
-    configuration.setValue(false, forKey: "drawsBackground")
     testExistenceOfSelector(object: configuration, selector: "_drawsBackground")
   }
 
   func testExistenceOfDeveloperPreferences() {
     let preferences = WKWebViewConfiguration().preferences
-    preferences.setValue(true, forKey: "developerExtrasEnabled")
-    testExistenceOfSelector(object: preferences, selector: "_developerExtrasEnabled")
-
-    preferences.setValue(false, forKey: "webSecurityEnabled")
-    testExistenceOfSelector(object: preferences, selector: "_webSecurityEnabled")
+    testExistenceOfSelector(object: preferences, selector: "_setDeveloperExtrasEnabled:")
+    testExistenceOfSelector(object: preferences, selector: "_setWebSecurityEnabled:")
 
     let webView = WKWebView()
     testExistenceOfSelector(object: webView, selector: "_inspector")
 
     let inspector = webView.perform(sel_getUid("_inspector")).takeUnretainedValue()
     testExistenceOfSelector(object: inspector, selector: "show")
+  }
+
+  func testExistenceOfPerformancePreferences() {
+    let configuration = WKWebViewConfiguration()
+    testExistenceOfSelector(object: configuration, selector: "_setDelaysWebProcessLaunchUntilFirstLoad:")
+    testExistenceOfSelector(object: configuration, selector: "_setWaitsForPaintAfterViewDidMoveToWindow:")
+
+    let preferences = configuration.preferences
+    testExistenceOfSelector(object: preferences, selector: "_setPageVisibilityBasedProcessSuppressionEnabled:")
+    testExistenceOfSelector(object: preferences, selector: "_setHiddenPageDOMTimerThrottlingEnabled:")
+    testExistenceOfSelector(object: preferences, selector: "_setHiddenPageDOMTimerThrottlingAutoIncreases:")
+  }
+
+  func testExistenceOfFeatureSPI() {
+    testExistenceOfSelector(object: WKPreferences.self, selector: "_features")
+
+    let preferences = WKPreferences()
+    testExistenceOfSelector(object: preferences, selector: "_setEnabled:forFeature:")
+
+    guard let features = (WKPreferences.self as AnyObject)
+      .perform(sel_getUid("_features"))?.takeUnretainedValue() as? [AnyObject] else {
+      return XCTFail("Failed to retrieve _features from WKPreferences")
+    }
+
+    let keys = Set(features.compactMap { $0.value(forKey: "key") as? String })
+    for key in ["ServiceWorkersEnabled", "EncryptedMediaAPIEnabled", "LegacyEncryptedMediaAPIEnabled", "WebLocksAPIEnabled"] {
+      XCTAssert(keys.contains(key), "Missing feature key: \(key)")
+    }
+  }
+
+  func testExistenceOfBulkFeatureDisabling() {
+    let preferences = WKPreferences()
+    testExistenceOfSelector(object: preferences, selector: "_disableRichJavaScriptFeatures")
+    testExistenceOfSelector(object: preferences, selector: "_disableMediaPlaybackRelatedFeatures")
   }
 
   func testExistenceOfAutomaticInlineCompletion() {
@@ -61,6 +83,22 @@ final class RuntimeTests: XCTestCase {
 
   func testExistenceOfImageTintColor() {
     testExistenceOfSelector(object: NSImage(), selector: "_setTintColor:")
+  }
+
+  func testExistenceOfAppKitSearchField() {
+    let window = NSWindow()
+    window.makeKeyAndOrderFront(nil)
+
+    let searchField = NSSearchField(frame: CGRect(x: 0, y: 0, width: 240, height: 40))
+    window.contentView?.addSubview(searchField)
+
+    let expectation = XCTestExpectation()
+    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+      expectation.fulfill()
+    }
+
+    wait(for: [expectation])
+    XCTAssertNotNil(searchField.modernBezelView)
   }
 
   func testRetrievingPopover() {

@@ -17,9 +17,14 @@ public extension NSWindow {
   //
   // In macOS Tahoe, it can also be an NSTitlebarBackgroundView for the modern style
   var toolbarEffectView: NSView? {
-    toolbarContainerView?.subviews.first {
-      ($0 is NSVisualEffectView) || ($0.className == "NSTitlebarBackgroundView")
+    // [macOS 26] Revisit this later (#1281)
+    for view in (toolbarContainerView?.subviews ?? []) {
+      if view is NSVisualEffectView || view.className == "NSTitlebarBackgroundView" {
+        return view
+      }
     }
+
+    return nil
   }
 
   var toolbarTitleView: NSView? {
@@ -33,6 +38,25 @@ public extension NSWindow {
     let size = frameRect(forContentRect: CGRect(origin: .zero, size: target)).size
     let frame = CGRect(origin: frame.origin, size: size).offsetBy(dx: 0, dy: frame.height - size.height)
     setFrame(frame, display: flag, animate: animated)
+  }
+
+  /// Change the frame size by a delta, treat the top-left corner as the anchor point.
+  func resizeBy(_ delta: CGSize) {
+    setFrameSize(CGSize(width: frame.width + delta.width, height: frame.height + delta.height))
+  }
+
+  /// Move the window to a web-style point, converting from top-left to bottom-left origin.
+  func moveToWebPoint(_ point: CGPoint) {
+    guard let screen else {
+      return
+    }
+
+    setFrameOrigin(CGPoint(x: point.x, y: screen.frame.maxY - point.y - frame.height))
+  }
+
+  /// Move the window by a web-style delta, where positive y goes down.
+  func moveByWebPoint(_ delta: CGPoint) {
+    setFrameOrigin(CGPoint(x: frame.origin.x + delta.x, y: frame.origin.y - delta.y))
   }
 
   /// Move the window to the center of a screen, with an offset to look optically more centered.
@@ -101,9 +125,14 @@ private extension NSWindow {
       return self
     }
 
-    // NSToolbarFullScreenWindow is used when the app is in full-screen mode
-    return NSApp.windows.first {
-      $0.isMainWindow && $0.className.hasPrefix("NSToolbarFullScreen")
-    } ?? self
+    // [macOS 26] Revisit this later (#1281)
+    for window in NSApp.windows {
+      // NSToolbarFullScreenWindow is used when the app is in full-screen mode
+      if window.isMainWindow && window.className.hasPrefix("NSToolbarFullScreen") {
+        return window
+      }
+    }
+
+    return self
   }
 }

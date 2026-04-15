@@ -49,10 +49,6 @@ final class Application: NSApplication {
     }
   }
 
-  var currentEditor: EditorViewController? {
-    keyWindow?.contentViewController as? EditorViewController
-  }
-
   static func main() {
     // Parse command line arguments before anything else.
     let args = Array(CommandLine.arguments.dropFirst())
@@ -121,7 +117,7 @@ final class Application: NSApplication {
       Logger.assert(sender is NSMenuItem, "Invalid sender was found")
       Logger.assert(target == nil || (target as? AnyObject)?.className == "WKMenuTarget", "Invalid target was found")
 
-      if MarkEditWritingTools.shouldReselect(withItem: sender) {
+      if AppWritingTools.shouldReselect(withItem: sender) {
         ensureWritingToolsSelectionRect()
       }
 

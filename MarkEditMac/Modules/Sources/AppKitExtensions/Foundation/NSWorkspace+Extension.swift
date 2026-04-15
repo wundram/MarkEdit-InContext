@@ -7,8 +7,9 @@
 import AppKit
 
 public extension NSWorkspace {
-  func openTerminal() {
+  func openTerminal(preferredIdentifier: String? = nil) {
     let identifiers = [
+      preferredIdentifier,      // User configured
       "com.googlecode.iterm2",  // iTerm2
       "com.mitchellh.ghostty",  // Ghostty
       "dev.warp.Warp-Stable",   // Warp
@@ -23,7 +24,7 @@ public extension NSWorkspace {
       "com.emtec.zoc8",         // Zoc
       "org.tabby",              // Tabby
       "com.apple.Terminal",     // Terminal
-    ]
+    ].compactMap { $0 }
 
     if let url = identifiers.compactMap({ urlForApplication(withBundleIdentifier: $0) }).first {
       openApplication(at: url, configuration: Self.OpenConfiguration())
@@ -35,13 +36,22 @@ public extension NSWorkspace {
   /// The return value indicates whether it's successfully opened or revealed.
   @discardableResult
   func openOrReveal(url: URL) -> Bool {
-    // It's not a local file or we have read access, we just open it
-    guard url.scheme == "file" && !FileManager.default.isReadableFile(atPath: url.path) else {
+    guard url.scheme == "file" else {
+      // Directly open non-local URLs
       return open(url)
     }
 
-    // Otherwise, we can only reveal it in Finder
-    if FileManager.default.fileExists(atPath: url.path) {
+    // Get the standardized version of local URLs
+    let url = url.standardized
+    let path = url.path(percentEncoded: false)
+
+    if FileManager.default.isReadableFile(atPath: path) {
+      // Open when we have the read access
+      return open(url)
+    }
+
+    if FileManager.default.fileExists(atPath: path) {
+      // Reveal otherwise
       activateFileViewerSelecting([url])
       return true
     }

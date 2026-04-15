@@ -24,6 +24,7 @@
 				<string>mdoc</string>
 				<string>mdtext</string>
 				<string>mdtxt</string>
+				<string>mdx</string>
 			</array>
 			<key>LSItemContentTypes</key>
 			<array>
@@ -88,6 +89,48 @@
 			<key>NSDocumentClass</key>
 			<string>$(PRODUCT_MODULE_NAME).EditorDocument</string>
 		</dict>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Structured Text</string>
+			<key>LSTypeIsPackage</key>
+			<false/>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>mmd</string>
+				<string>mermaid</string>
+				<string>tex</string>
+				<string>ltx</string>
+			</array>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.plain-text</string>
+				<string>public.utf8-plain-text</string>
+				<string>public.utf16-plain-text</string>
+				<string>public.text</string>
+			</array>
+			<key>NSDocumentClass</key>
+			<string>$(PRODUCT_MODULE_NAME).EditorDocument</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Binary File</string>
+			<key>LSTypeIsPackage</key>
+			<false/>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.data</string>
+			</array>
+			<key>NSDocumentClass</key>
+			<string>$(PRODUCT_MODULE_NAME).EditorDocument</string>
+		</dict>
 	</array>
 	<key>NSAppleScriptEnabled</key>
 	<false/>
@@ -132,6 +175,7 @@
 					<string>mdoc</string>
 					<string>mdtext</string>
 					<string>mdtxt</string>
+					<string>mdx</string>
 				</array>
 			</dict>
 		</dict>

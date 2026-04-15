@@ -457,6 +457,19 @@
         }
       }
     },
+    "6iB-Ox-Xb3.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"(settings.json)\"; ObjectID = \"6iB-Ox-Xb3\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "(settings.json)"
+          }
+        }
+      },
+      "shouldTranslate" : false
+    },
     "7eH-ja-yIc.title" : {
       "comment" : "Class = \"NSMenu\"; title = \"Line Endings\"; ObjectID = \"7eH-ja-yIc\";",
       "extractionState" : "extracted_with_value",
@@ -2109,6 +2122,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "打開選單"
+          }
+        }
+      }
+    },
+    "J5p-F8-eb5.title" : {
+      "comment" : "Class = \"NSMenuItem\"; title = \"Official Extensions\"; ObjectID = \"J5p-F8-eb5\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Official Extensions"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "官方扩展功能"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "官方擴充功能"
           }
         }
       }

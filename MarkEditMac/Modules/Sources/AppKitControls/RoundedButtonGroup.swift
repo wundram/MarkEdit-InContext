@@ -10,30 +10,22 @@ import AppKit
  Rounded button group with two buttons and a divider in the middle.
  */
 open class RoundedButtonGroup: NSView {
-  public var isEnabled: Bool = true {
+  public var isEnabled: Bool = false {
     didSet {
-      let alphaValue: Double = isEnabled ? 1.0 : 0.4
-      leftButton.isEnabled = isEnabled
-      leftButton.alphaValue = alphaValue
-      rightButton.isEnabled = isEnabled
-      rightButton.alphaValue = alphaValue
+      updateAppearance()
     }
   }
 
   private let modernStyle: Bool
   private let leftButton: NSButton
   private let rightButton: NSButton
-  private let dividerView = DividerView(color: .plainButtonBorder, hairlineWidth: false)
+  private let dividerView = DividerView(color: .plainButtonBorder)
 
   public init(modernStyle: Bool, leftButton: NonBezelButton, rightButton: NonBezelButton) {
     self.modernStyle = modernStyle
     self.leftButton = leftButton
     self.rightButton = rightButton
     super.init(frame: .zero)
-
-    defer {
-      isEnabled = false
-    }
 
     wantsLayer = true
     layer?.masksToBounds = true
@@ -60,6 +52,9 @@ open class RoundedButtonGroup: NSView {
     leftButton.focusRingCorners = .left
     rightButton.focusRingRadius = Constants.cornerRadius
     rightButton.focusRingCorners = .right
+
+    isEnabled = false
+    updateAppearance()
   }
 
   @available(*, unavailable)
@@ -111,5 +106,13 @@ open class RoundedButtonGroup: NSView {
 private extension RoundedButtonGroup {
   enum Constants {
     static let cornerRadius: Double = 5
+  }
+
+  func updateAppearance() {
+    let alphaValue: Double = isEnabled ? 1.0 : 0.4
+    leftButton.isEnabled = isEnabled
+    leftButton.alphaValue = alphaValue
+    rightButton.isEnabled = isEnabled
+    rightButton.alphaValue = alphaValue
   }
 }

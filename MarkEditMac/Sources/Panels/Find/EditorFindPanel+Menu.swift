@@ -37,8 +37,8 @@ extension EditorFindPanel {
     regexItem.setOn(AppPreferences.Search.regularExpression)
     menu.addItem(.separator())
 
-    if let operationsItem = delegate?.editorFindPanelOperationsMenuItem(self) {
-      menu.addItem(operationsItem)
+    if let actionsItem = delegate?.editorFindPanelActionsMenuItem(self) {
+      menu.addItem(actionsItem)
       menu.addItem(.separator())
     }
 
@@ -116,6 +116,6 @@ private extension EditorFindPanel {
     })?.contains { $0.state == .on } ?? false
 
     let tintColor: NSColor? = shouldTint ? .controlAccentColor : nil
-    searchField.setIconTintColor(tintColor)
+    searchField.setSearchIconColor(tintColor)
   }
 }

@@ -6,7 +6,6 @@ import { WebModuleCoreImpl } from './src/bridge/web/core';
 import { WebModuleCompletionImpl } from './src/bridge/web/completion';
 import { WebModuleHistoryImpl } from './src/bridge/web/history';
 import { WebModuleLineEndingsImpl } from './src/bridge/web/lineEndings';
-import { WebModuleTextCheckerImpl } from './src/bridge/web/textChecker';
 import { WebModuleSelectionImpl } from './src/bridge/web/selection';
 import { WebModuleFormatImpl } from './src/bridge/web/format';
 import { WebModuleSearchImpl } from './src/bridge/web/search';
@@ -27,7 +26,7 @@ import { NativeModuleTranslation } from './src/bridge/native/translation';
 
 import { resetEditor } from './src/core';
 import { initThemeExtractors, initMarkEditModules } from './src/api/modules';
-import { setUp } from './src/styling/config';
+import { setUp, applyReducedMotion } from './src/styling/config';
 import { loadTheme } from './src/styling/themes';
 import { startObserving } from './src/modules/events';
 
@@ -66,7 +65,6 @@ window.webModules = {
   completion: new WebModuleCompletionImpl(),
   history: new WebModuleHistoryImpl(),
   lineEndings: new WebModuleLineEndingsImpl(),
-  textChecker: new WebModuleTextCheckerImpl(),
   selection: new WebModuleSelectionImpl(),
   format: new WebModuleFormatImpl(),
   search: new WebModuleSearchImpl(),
@@ -86,6 +84,33 @@ window.nativeModules = {
   translation: createNativeModule<NativeModuleTranslation>('translation'),
 };
 
+// In release mode, override window APIs to bridge to native
+if (isReleaseMode) {
+  window.resizeTo = (width: number, height: number) => {
+    window.nativeModules.core.notifyWindowResize({ method: 'to', width, height });
+  };
+
+  window.resizeBy = (x: number, y: number) => {
+    window.nativeModules.core.notifyWindowResize({ method: 'by', width: x, height: y });
+  };
+
+  window.moveTo = (x: number, y: number) => {
+    window.nativeModules.core.notifyWindowMove({ method: 'to', x, y });
+  };
+
+  window.moveBy = (x: number, y: number) => {
+    window.nativeModules.core.notifyWindowMove({ method: 'by', x, y });
+  };
+
+  window.close = () => {
+    window.nativeModules.core.notifyWindowClose();
+  };
+
+  window.print = () => {
+    throw new Error('Window.print() is not implemented in this context.');
+  };
+}
+
 window.onload = () => {
   window.nativeModules.core.notifyWindowDidLoad();
 
@@ -98,3 +123,7 @@ window.onload = () => {
 
 setUp(config, loadTheme(config.theme).colors);
 startObserving();
+
+// Respond to reduced motion preference changes
+const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+reducedMotionQuery.addEventListener('change', event => applyReducedMotion(event.matches));

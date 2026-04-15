@@ -27,14 +27,6 @@ extension EditorViewController {
 
     wrapper.addSubview(findPanel)
     wrapper.addSubview(replacePanel)
-    wrapper.addSubview(panelDivider)
-
-    // findPanel is added before replacePanel to ensure the key view loop,
-    // but we want findPanel visually above the replacePanel to play UI tricks.
-    if let findPanelLayer = findPanel.layer {
-      wrapper.layer?.insertSublayer(findPanelLayer, above: replacePanel.layer)
-    }
-
     wrapper.addSubview(webView)
     wrapper.addSubview(statusView)
 
@@ -44,13 +36,11 @@ extension EditorViewController {
       wrapper.addSubview(modernDividerView)
     }
 
-    if !hasFinishedLoading {
-      wrapper.addSubview(loadingIndicator)
-    }
+    // The divider must be on very top
+    wrapper.addSubview(panelDivider)
 
     layoutPanels()
     layoutWebView()
-    layoutLoadingIndicator()
     layoutStatusView()
 
     if AppDesign.modernTitleBar {
@@ -87,16 +77,7 @@ extension EditorViewController {
       ])
 
       // To avoid duplicate dividers
-      if AppDesign.modernStyle {
-        modernDividerView.alphaValue = 0
-        modernDividerView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-          modernDividerView.leadingAnchor.constraint(equalTo: findPanel.leadingAnchor),
-          modernDividerView.trailingAnchor.constraint(equalTo: findPanel.trailingAnchor),
-          modernDividerView.topAnchor.constraint(equalTo: findPanel.topAnchor),
-          modernDividerView.heightAnchor.constraint(equalToConstant: modernDividerView.length),
-        ])
-      }
+      modernDividerView.alphaValue = 0
     }
 
     // Initially hide panels to prevent being found by VoiceOver
@@ -208,7 +189,7 @@ extension EditorViewController {
       // Work around undo stack and selection range issues
       self.bridge.writingTools.setActive(
         isActive: isActive,
-        reselect: MarkEditWritingTools.shouldReselect(with: MarkEditWritingTools.requestedTool)
+        reselect: AppWritingTools.shouldReselect(with: AppWritingTools.requestedTool)
       )
 
       // Invisible rendering doesn't work well with Writing Tools, temporarily disable it for now
@@ -226,6 +207,13 @@ extension EditorViewController {
   }
 
   func layoutPanels(animated: Bool = false) {
+    // findPanel is added before replacePanel to ensure the key view loop,
+    // but we want findPanel visually above the replacePanel to play UI tricks.
+    if let findPanelLayer = findPanel.layer, let superLayer = findPanelLayer.superlayer {
+      findPanelLayer.removeFromSuperlayer()
+      superLayer.insertSublayer(findPanelLayer, above: replacePanel.layer)
+    }
+
     findPanel.update(animated).frame = findPanelRect
     replacePanel.update(animated).frame = replacePanelRect
     panelDivider.update(animated).frame = panelDividerRect
@@ -236,9 +224,20 @@ extension EditorViewController {
     )
 
     if AppDesign.modernTitleBar {
-      modernEffectHeight.constant = view.safeAreaInsets.top
+      modernEffectHeight.constant = view.safeAreaInsets.top + panelDivider.frame.height
       modernDividerView.update(animated).alphaValue = findPanel.mode == .hidden ? 0 : 1
+    } else {
+      // To avoid duplicate dividers on legacy titlebar
+      panelDivider.isHidden = findPanel.mode == .hidden
     }
+
+    // The position of this divider should be fixed
+    modernDividerView.frame = CGRect(
+      x: 0,
+      y: contentHeight - modernDividerView.length,
+      width: view.frame.width,
+      height: modernDividerView.length
+    )
   }
 
   func layoutWebView(animated: Bool = false) {
@@ -254,23 +253,6 @@ extension EditorViewController {
       width: view.bounds.width,
       height: height - findPanelHeight
     )
-  }
-
-  func layoutLoadingIndicator() {
-    guard !loadingIndicator.hasUnfinishedAnimations else {
-      return
-    }
-
-    let size: Double = 72
-    loadingIndicator.frame = CGRect(
-      x: (view.bounds.width - size) * 0.5,
-      y: (view.bounds.height - size) * 0.5,
-      width: size,
-      height: size
-    )
-
-    // Hide the indicator when the window is small enough
-    loadingIndicator.isHidden = view.bounds.width < 200 || view.bounds.height < 200
   }
 
   func layoutStatusView() {
@@ -565,7 +547,7 @@ private extension EditorViewController {
 
   var panelDividerRect: CGRect {
     let offset: Double = {
-      if AppDesign.modernStyle && findPanel.mode == .hidden {
+      if findPanel.mode == .hidden {
         return contentHeight - panelDivider.length
       }
 

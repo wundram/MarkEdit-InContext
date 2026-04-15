@@ -49,8 +49,8 @@ extension EditorViewController: EditorWebViewActionDelegate {
     isReadOnlyMode
   }
 
-  func editorWebViewSearchOperationsMenuItem(_ webView: EditorWebView) -> NSMenuItem? {
-    searchOperationsMenuItem
+  func editorWebViewSearchActionsMenuItem(_ webView: EditorWebView) -> NSMenuItem? {
+    searchActionsMenuItem
   }
 
   func editorWebViewResignFirstResponder(_ webView: EditorWebView) {
@@ -105,20 +105,32 @@ extension EditorViewController: EditorModuleCoreDelegate {
   func editorCoreWindowDidLoad(_ sender: EditorModuleCore) {
     hasFinishedLoading = true
     resetEditor()
+  }
 
-    loadingIndicator.scaleTo(0.9, duration: 0.1) {
-      let duration: TimeInterval = 0.3
-
-      NSAnimationContext.runAnimationGroup { context in
-        context.duration = duration
-        self.loadingIndicator.animator().alphaValue = 0
-      } completionHandler: {
-        // Destroy it since we only need the indicator for cold launch
-        self.loadingIndicator.removeFromSuperview()
-      }
-
-      self.loadingIndicator.scaleTo(2.0, duration: duration)
+  func editorCoreWindowResize(
+    _ sender: EditorModuleCore,
+    method: NativeModuleCoreNotifyWindowResizeMethod,
+    size: CGSize
+  ) {
+    switch method {
+    case .to: view.window?.setFrameSize(size)
+    case .by: view.window?.resizeBy(size)
     }
+  }
+
+  func editorCoreWindowMove(
+    _ sender: EditorModuleCore,
+    method: NativeModuleCoreNotifyWindowMoveMethod,
+    point: CGPoint
+  ) {
+    switch method {
+    case .to: view.window?.moveToWebPoint(point)
+    case .by: view.window?.moveByWebPoint(point)
+    }
+  }
+
+  func editorCoreWindowClose(_ sender: EditorModuleCore) {
+    view.window?.close()
   }
 
   func editorCoreEditorDidBecomeIdle(_ sender: EditorModuleCore) {
@@ -170,6 +182,8 @@ extension EditorViewController: EditorModuleCoreDelegate {
     hasBeenEdited = hasBeenEdited || contentEdited
     if contentEdited {
       document?.isOutdated = true
+
+      // MarkEdit InContext: window restoration disabled, no autosave needed
     }
 
     // Only update the dirty state when it's edited,
@@ -356,8 +370,8 @@ extension EditorViewController: EditorFindPanelDelegate {
     updateTextFinderQuery()
   }
 
-  func editorFindPanelOperationsMenuItem(_ sender: EditorFindPanel) -> NSMenuItem? {
-    searchOperationsMenuItem
+  func editorFindPanelActionsMenuItem(_ sender: EditorFindPanel) -> NSMenuItem? {
+    searchActionsMenuItem
   }
 
   func editorFindPanelDidChangeOptions(_ sender: EditorFindPanel) {
