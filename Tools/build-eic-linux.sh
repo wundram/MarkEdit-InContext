@@ -1,54 +1,84 @@
 #!/usr/bin/env bash
 # Cross-compile the eic client to static Linux binaries for x86_64 and aarch64
-# using the Swift static Linux SDK. Designed to be run on a macOS host with Swift 6.0+.
+# using the Swift Static Linux SDK. Designed to be run on a macOS host.
 #
 # Outputs:
 #   dist/eic-linux-x86_64
 #   dist/eic-linux-aarch64
 #
-# Prerequisites (one-time):
-#   swift sdk install https://download.swift.org/swift-6.0.3-release/static-sdk/swift-6.0.3-RELEASE/swift-6.0.3-RELEASE_static-linux-0.0.1.artifactbundle.tar.gz \
-#     --checksum 67f765e0030e661a7450f7e4877cfe008db4f57f177d5a08a6e26fd661cdd0bd
+# IMPORTANT: the toolchain and the static SDK must be the same Swift release
+# (the SDK ships pre-compiled .swiftmodules that the host compiler must match
+# bit-for-bit). Apple's Xcode-bundled Swift can NOT be used because Apple
+# only ships the toolchain, not a matching static SDK. Use swiftly to install
+# an open-source toolchain alongside Xcode's, then point this script at it.
 #
-# (See https://www.swift.org/install/macos/static-linux/ for current SDK URL and checksum.)
+# One-time setup (~3GB download):
+#   brew install swiftly
+#   swiftly init --no-modify-profile --skip-install   # answer Y
+#   source ~/.swiftly/env.sh
+#   swiftly install 6.2
+#   # Find the SDK URL + checksum (URL pattern: swift-X.Y-release/static-sdk/swift-X.Y-RELEASE/swift-X.Y-RELEASE_static-linux-0.0.1.artifactbundle.tar.gz)
+#   ~/Library/Developer/Toolchains/swift-6.2-RELEASE.xctoolchain/usr/bin/swift sdk install \
+#     https://download.swift.org/swift-6.2-release/static-sdk/swift-6.2-RELEASE/swift-6.2-RELEASE_static-linux-0.0.1.artifactbundle.tar.gz \
+#     --checksum d2225840e592389ca517bbf71652f7003dbf45ac35d1e57d98b9250368769378
+#
+# Versioning:
+#   - SWIFT_VERSION below pins both the toolchain and the SDK release.
+#   - When bumping, verify the SDK URL exists at:
+#       https://download.swift.org/swift-${SWIFT_VERSION}-release/static-sdk/swift-${SWIFT_VERSION}-RELEASE/
+#     Note that some patch releases (e.g. 6.2.4) don't ship a matching static SDK;
+#     the canonical SDK lives under the bare-minor URL (e.g. swift-6.2-release).
 
 set -euo pipefail
+
+SWIFT_VERSION="${EIC_SWIFT_VERSION:-6.2}"
+TOOLCHAIN="$HOME/Library/Developer/Toolchains/swift-${SWIFT_VERSION}-RELEASE.xctoolchain"
+SWIFT="$TOOLCHAIN/usr/bin/swift"
+
+if [ ! -x "$SWIFT" ]; then
+  echo "error: open-source Swift ${SWIFT_VERSION} toolchain not found at $TOOLCHAIN" >&2
+  echo "install it with: swiftly install ${SWIFT_VERSION}" >&2
+  echo "(see header of this script for the full one-time setup)" >&2
+  exit 1
+fi
 
 cd "$(dirname "$0")/.."
 PKG_PATH="EICClient"
 OUT_DIR="dist"
 mkdir -p "$OUT_DIR"
 
-SDK_ID="$(swift sdk list 2>/dev/null | grep -E 'swift-.*-RELEASE_static-linux' | head -1 || true)"
-if [ -z "${SDK_ID}" ]; then
-  echo "error: no Swift static-linux SDK installed. Install it with:" >&2
-  echo "  swift sdk install <URL-to-static-linux-artifactbundle> --checksum <sha256>" >&2
-  echo "See https://www.swift.org/install/macos/static-linux/ for the current URL/checksum." >&2
+SDK_BUNDLE="swift-${SWIFT_VERSION}-RELEASE_static-linux-0.0.1"
+if ! "$SWIFT" sdk list 2>/dev/null | grep -q "$SDK_BUNDLE"; then
+  echo "error: static SDK $SDK_BUNDLE not installed for this toolchain." >&2
+  echo "install with: $SWIFT sdk install <URL> --checksum <sha256>" >&2
+  echo "see the header of this script for the URL/checksum pattern." >&2
   exit 1
 fi
-
-echo "Using SDK: $SDK_ID"
 
 build_one() {
   local triple="$1"
   local suffix="$2"
   echo "=== Building $triple -> eic-linux-$suffix ==="
-  swift build \
+  "$SWIFT" build \
     --package-path "$PKG_PATH" \
     --swift-sdk "$triple" \
     -c release \
     --product eic
   cp "$PKG_PATH/.build/$triple/release/eic" "$OUT_DIR/eic-linux-$suffix"
-  echo "-> $OUT_DIR/eic-linux-$suffix ($(stat -f%z "$OUT_DIR/eic-linux-$suffix" 2>/dev/null || stat -c%s "$OUT_DIR/eic-linux-$suffix") bytes)"
+  echo "-> $OUT_DIR/eic-linux-$suffix ($(stat -f%z "$OUT_DIR/eic-linux-$suffix" 2>/dev/null || stat -c%s "$OUT_DIR/eic-linux-$suffix") bytes, unstripped)"
 }
 
-build_one "x86_64-swift-linux-musl" "x86_64"
+build_one "x86_64-swift-linux-musl"  "x86_64"
 build_one "aarch64-swift-linux-musl" "aarch64"
 
 echo
-echo "Done. Distribute the binaries in $OUT_DIR/ alongside a short README:"
-echo "  1. Copy the binary to /usr/local/bin/eic (or anywhere on PATH) on the Linux host."
-echo "  2. Arrange for SSH to forward the Mac's eic port to the remote host, e.g.:"
-echo "       ssh -R 50051:127.0.0.1:\$(cat ~/.eic/eic.port) remote-host"
-echo "     and export EIC_PORT=50051 in the remote shell (via SendEnv/AcceptEnv or shell rc)."
-echo "  3. Run 'eic file.md' on the remote host — the editor opens on your Mac."
+echo "Built. Each binary is ~225M unstripped, ~75M after a remote 'strip' on Linux."
+echo
+echo "Distribution:"
+echo "  scp $OUT_DIR/eic-linux-x86_64 user@linux-host:~/eic"
+echo "  ssh user@linux-host 'sudo dnf install -y binutils && strip ~/eic && chmod +x ~/eic'"
+echo
+echo "Use over SSH (open editor on Mac from a remote shell):"
+echo "  PORT=\$(cat ~/.eic/eic.port)"
+echo "  ssh -fN -R 50051:127.0.0.1:\$PORT user@linux-host"
+echo "  ssh user@linux-host 'EIC_PORT=50051 EIC_CLIENT_NAME=\$(hostname) ~/eic file.md'"

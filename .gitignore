@@ -9,3 +9,4 @@ Local.xcconfig
 EICShared/.build
 EICServer/.build
 EICClient/.build
+dist/
