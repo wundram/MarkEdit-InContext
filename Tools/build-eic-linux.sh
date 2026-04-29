@@ -55,6 +55,14 @@ if ! "$SWIFT" sdk list 2>/dev/null | grep -q "$SDK_BUNDLE"; then
   exit 1
 fi
 
+OBJCOPY="$TOOLCHAIN/usr/bin/llvm-objcopy"
+if [ ! -x "$OBJCOPY" ]; then
+  echo "warning: llvm-objcopy not found at $OBJCOPY; skipping strip" >&2
+  OBJCOPY=""
+fi
+
+filesize() { stat -f%z "$1" 2>/dev/null || stat -c%s "$1"; }
+
 build_one() {
   local triple="$1"
   local suffix="$2"
@@ -64,19 +72,25 @@ build_one() {
     --swift-sdk "$triple" \
     -c release \
     --product eic
-  cp "$PKG_PATH/.build/$triple/release/eic" "$OUT_DIR/eic-linux-$suffix"
-  echo "-> $OUT_DIR/eic-linux-$suffix ($(stat -f%z "$OUT_DIR/eic-linux-$suffix" 2>/dev/null || stat -c%s "$OUT_DIR/eic-linux-$suffix") bytes, unstripped)"
+  local src="$PKG_PATH/.build/$triple/release/eic"
+  local dest="$OUT_DIR/eic-linux-$suffix"
+  cp "$src" "$dest.unstripped"
+  if [ -n "$OBJCOPY" ]; then
+    "$OBJCOPY" --strip-all "$src" "$dest"
+    echo "-> $dest ($(filesize "$dest") bytes stripped, $(filesize "$dest.unstripped") bytes unstripped)"
+  else
+    cp "$src" "$dest"
+    echo "-> $dest ($(filesize "$dest") bytes, NOT stripped — install llvm-objcopy)"
+  fi
 }
 
 build_one "x86_64-swift-linux-musl"  "x86_64"
 build_one "aarch64-swift-linux-musl" "aarch64"
 
 echo
-echo "Built. Each binary is ~225M unstripped, ~75M after a remote 'strip' on Linux."
+echo "Built. Each stripped binary is ~75M; .unstripped sidecars (~225M) are kept for debugging."
 echo
-echo "Distribution:"
-echo "  scp $OUT_DIR/eic-linux-x86_64 user@linux-host:~/eic"
-echo "  ssh user@linux-host 'sudo dnf install -y binutils && strip ~/eic && chmod +x ~/eic'"
+echo "Run Tools/build-eic-installer.sh next to wrap each stripped binary into a self-extracting .sh installer."
 echo
 echo "Use over SSH (open editor on Mac from a remote shell):"
 echo "  PORT=\$(cat ~/.eic/eic.port)"
